@@ -19,87 +19,19 @@
     <script>
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
-    // var map = L.mapbox.map('map', 'mapbox.streets')
-    //     .setView([37.75, -122.327], 12)
-    //     .addControl(L.mapbox.geocoderControl('mapbox.places'));
-
-    // L.mapbox.featureLayer('terriwlee.p3o5adlc').addTo(map);
-
-    var geojson =
-      [{
-        "type":"Feature",
-        "properties":{
-            "title":"Spontaneous Storytelling & Free Drinks Night | Oakland",
-            "date":"Saturday, February 13, 2016",
-            "time":" 6:30 pm to 8:30 pm",
-            "venue":"The Layover",
-            "address":"1517 Franklin Street Oakland, CA",
-            "cost":" FREE",
-            "img_url":"http://cdn.funcheap.com/wp-content/uploads/2016/02/mulderscully-80x80.jpg",
-            "description":"Saturday, February 13, 2016",
-            "marker-color":"f86767",
-            "marker-size":"small",
-            "marker-symbol":"marker"
-            },
-        "geometry":{
-            "coordinates":[-122.269298,37.804911],
-            "type":"Point"
-            },
-        "id":"13b9a06f48144ee5235c1790e2586393"
-        },
-      {
-        "type":"Feature",
-        "properties":{
-            "title":"13th Annual Big Lebowski Party: Live Show, Costumes & Mini-Bowling | SF",
-            "date":"Saturday, February 13, 2016",
-            "time":" 8:00 pm",
-            "venue":"Brava Theater",
-            "address":"2781 24th St, San Francisco, CA",
-            "cost":" $15",
-            "img_url":"http://cdn.funcheap.com/wp-content/uploads/2012/02/big-lebowski-250x200.png",
-            "description":"Saturday, February 13, 2016",
-            "marker-color":"f86767",
-            "marker-size":"small",
-            "marker-symbol":"marker"
-            },
-        "geometry":{
-            "coordinates":[-122.408083,37.752858],
-            "type":"Point"
-            },
-        "id":"34199c8e44e6628dc15a56ce57d126d2"
-        }, 
-      {            
-        "type":"Feature",
-        "properties":{
-            "title":"“FabFashionista” Valentine’s Warehouse Sale Extravaganza | SF",
-            "date":"Saturday, February 13, 2016",
-            "time":" 9:30 am to 3:30 pm",
-            "venue":"Fort Mason Center",
-            "address":"2 Marina Blvd, San Francisco, CA",
-            "cost":" FREE*",
-            "img_url":"http://cdn.funcheap.com/wp-content/uploads/2012/11/ella-moss-sale-250x187.jpg",
-            "description":"Saturday, February 13, 2016",
-            "marker-color":"f86767",
-            "marker-size":"small",
-            "marker-symbol":"marker"
-            },
-        "geometry":{
-            "coordinates":[-122.432091,37.8052],
-            "type":"Point"
-        },
-        "id":"424dffc5228cee4a0b4b27ab91001e01"
-      }];
-
-
-    L.mapbox.map('map', 'mapbox.streets')
+    var map = L.mapbox.map('map', 'mapbox.streets')
         .setView([37.75, -122.327], 12)
-        .addControl(L.mapbox.geocoderControl('mapbox.places')) // Add geocoding: enable search using Mapbox Geocoding API
-        .featureLayer.setGeoJSON(geojson); // Load features/GeoJSONs on map
+        .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
-    // var map = L.mapbox.map('map', 'mapbox.streets');
     map.featureLayer.on('click', function(e) {
-        map.panTo(e.layer.getLatLng());
+        map.panTo(e.getLatLng());
     });
+
+    // initialize a featureLayer with Map ID and pull the features down:
+    L.mapbox.featureLayer('terriwlee.p3o5adlc').addTo(map);
+    // behind the scene: download with AJAX and 'ready' event is fired when it's completed.  
+
+    
 
     </script>    
 </body>
