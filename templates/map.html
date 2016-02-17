@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Weekend Wanderlust</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+
+
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
+    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
+
+<style>
+    body { margin:0; 
+           padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+    #categories {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #fff;
+    width: 200px;
+    padding:5px;
+    }
+
+    .label {
+    position: absolute;     
+    width: 315px;
+    height: 22px;
+    left: 10px;
+    top: 20px;
+    background-color: #ffcc66;
+    color: white; 
+    text-align: center;
+    padding-top: 8px;
+    font-size: 14px;
+    }
+
+    pre.ui-coordinates {
+  background:rgba(0,0,0,0.5);
+  position:absolute;
+  bottom:10px;
+  left:10px;
+/*  padding:5px 10px; */  
+  color:#fff;
+  font-size:11px;
+  line-height:18px;
+  border-radius:3px;
+  max-height:90%;
+  overflow:auto;
+  width:315px;
+  }
+
+/*  .listCard {
+    background-color: transparent;
+    width: 100%;
+    height: auto;
+    }*/
+
+  .hover {
+    background: rgba(0,0,0,0.3);
+  }
+
+  #popupimg {
+    width: 100%;
+  }
+
+  #listImg {
+    width: 300px;
+    height: auto;
+  }
+
+  #container {
+    width: 300px;
+    vertical-align: middle;
+  }
+
+  #container img {
+    width: 300px;
+  }
+
+  #container p {
+    padding-left: 15px;
+    padding-right: 15px;
+    display: inline-block;
+    white-space: normal;
+    font-size: 12px;
+  }
+
+  #container form {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+ div {
+    font-family: 'Nunito', sans-serif;  
+    font-weight: 300;
+  }
+
+  #addToTrip {
+/*    margin: 10px;
+*/  }
+
+  .menu-ui {
+  background:#fff;
+  position:absolute;
+  top:10px;right:10px;
+  z-index:1;
+  border-radius:3px;
+  width:150px;
+  border:1px solid rgba(0,0,0,0.4);
+  }
+  .menu-ui a {
+    font-size:13px;
+    color:#404040;
+    display:block;
+    margin:0;padding:0;
+    padding:10px;
+    text-decoration:none;
+    border-bottom:1px solid rgba(0,0,0,0.25);
+    text-align:center;
+    }
+    .menu-ui a:first-child {
+      border-radius:3px 3px 0 0;
+      }
+    .menu-ui a:last-child {
+      border:none;
+      border-radius:0 0 3px 3px;
+      }
+    .menu-ui a:hover {
+      background:#f8f8f8;
+      color:#404040;
+      }
+    .menu-ui a.active,
+    .menu-ui a.active:hover {
+      background:#3887BE;
+      color:#FFF;
+      }
+
+
+
+    </style>
+</head>
+<body>
+<nav id='menu-ui' class='menu-ui'>
+    <a href='#' class='active' id='filter-all'>All</a>
+    <a href='#' id='filter-event'>This Weekend Events</a>
+    <a href='#' id='filter-coffee'>Hiddengems</a>
+</nav>
+<div id='map'></div>
+<div class='label'><b>Hiddengem in View</b></div>
+<pre id='coordinates' class='ui-coordinates'></pre>
+
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script>
+
+    L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
+
+    // load base map, set initial position, add search controller.
+    var map = L.mapbox.map('map', 'mapbox.streets')
+        .setView([37.75, -122.327], 12)
+        .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
+
+    var eventLayer = L.mapbox.featureLayer().addTo(map);
+
+    eventLayer.loadURL('/events0215.geojson');
+
+    var hiddengemLayer = L.mapbox.featureLayer().addTo(map);
+
+    hiddengemLayer.loadURL('/features-20160210.geojson');
+
+    map.on('move', function() {
+      $('#coordinates').empty();
+      var bounds = map.getBounds();
+
+      hiddengemLayer.eachLayer(function(marker) {
+        if (bounds.contains(marker.getLatLng())) {
+          var listContent = '<div id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '"><img id="listImg" src="' + marker.feature.properties.img_url + '" />' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p><form id="addToTrip"  action="/add_marker_to_trip" method="post" name="add_marker_to_trip"><input type="hidden" name="selected_marker_id" value=' + marker.feature.id + '><input type="submit" value="Add To Trip" /></form><br></div>';
+            
+            document.getElementById('coordinates').innerHTML += listContent;
+        }
+        $("#coordinates div").hover(
+        function(){ // mouseenter
+          $(this).addClass("hover");
+          // console.log("data.latlng:", this.dataset.latlng);
+          // console.log("data.id:", this.dataset.id);
+          // console.log(marker);
+          var target = this.dataset.id;
+          console.log(target);
+          hiddengemLayer.eachLayer(function(marker){
+            if (marker.feature.id === target) {
+              marker.openPopup();
+            }
+          });
+        }, 
+        function(){ // mouseleave
+          $(this).removeClass("hover");
+        }); 
+        });
+
+      //   $("#coordinates div").hover(
+      //   function(){ // mouseenter
+      //     $(this).addClass("hover");
+      //     console.log("data.latlng:", this.dataset.latlng);
+      //     console.log("data.id:", this.dataset.id);
+      //     marker.openPopup();
+      //   }, 
+      //   function(){ // mouseleave
+      //     $(this).removeClass("hover");
+      //   });   
+      // });
+  });
+
+
+    // on click, zoom in and show nearby
+    eventLayer.on('click', function(e) {
+        map.panTo(e.layer.getLatLng());
+        map.setView(e.latlng, 14);        
+    }); 
+
+    // customize popup content
+    hiddengemLayer.on('layeradd', function(e) {
+        var marker = e.layer,
+            feature = marker.feature;
+
+        if (feature.properties.type === 'event') {
+            var popupContent = '<a target="_blank" class="popup" href="' + feature.properties.event_url + '">' + '<img id=popupimg src="' + feature.properties.img_url + '" />' + '<b>' + feature.properties.title + '</b>' + '</a>' + '<br>' + feature.properties.date + ' | ' + feature.properties.time + '<br><form action="/add_marker_to_trip" method="post" name="add_marker_to_trip"><input type="hidden" name="selected_marker_id" value=' + feature.id + '><input type="submit" value="Add To Trip" /></form>';
+        } else {
+            popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.description + '<br><form action="/add_marker_to_trip" method="post" name="add_marker_to_trip"><input type="hidden" name="selected_marker_id" value=' + feature.id + '><input type="submit" value="Add To Trip" /></form>'; 
+        }
+
+        marker.bindPopup(popupContent, {
+            closeButton: false,
+            minWidth: 120
+            });
+    });
+
+    // show tooltips on hover
+    eventLayer.on('mouseover', function(e) {
+        e.layer.openPopup();
+    });
+
+    // $(document).ready(function(){
+      // $("#coordinates div").click(function(){
+        // var data = $(this).dataset.id;
+        // alert("clicked!");
+          // var data = $(this).dataset.id;
+          // hiddengemLayer.eachLayer(function(layer){
+          //   if (data === layer.feature.id) {
+          //     layer.openPopup();
+          //   }
+          // });
+    //     });
+    // });
+
+
+    // $('#map').on('click', '.add-to-trip-btn', function(){
+    //   alert('Added to trip!');
+    // });
+
+
+    // Toggling layers
+    // all = document.getElementById('filter-all'),
+    // events = document.getElementById('filter-event'),
+    // coffee = document.getElementById('filter-coffee');
+
+    // events.onclick = function(e) {
+    //     all.className = '';
+    //     coffee.className = '';
+    //     this.className = 'active';
+    //     eventLayer.setFilter(function(f) {
+    //         return f.properties['marker-type'] === 'event';
+    //     });
+    //     return false;
+    // };
+
+    // coffee.onclick = function() {
+    //     all.className = '';
+    //     events.className = '';
+    //     this.className = 'active';
+    //     hiddengemLayer.setFilter(function(f) {
+    //         return f.properties['type'] === 'Coffee';
+    //     });
+    //     return false;
+    // };
+
+    // all.onclick = function() {
+    //     events.className = '';
+    //     coffee.className = '';
+    //     this.className = 'active';
+    //     hiddengemLayer.setFilter(function(f) {
+    //         return true;
+    //     });
+    //     return false;
+    // };
+
+    
+    </script>    
+</body>
+</html>

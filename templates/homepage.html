@@ -1,38 +1,227 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=utf-8 />
-    <title>Basic Map</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
-    <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+{% extends 'base.html' %}
+{% block head %}
 
     <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
+        html,
+        body {
+        /* css for full size background image */
+            background: url(/static/img/background-1.jpg) no-repeat center center fixed;
+            background-size: cover;
+            -webkit-background-size: cover; /* safari */
+            -moz-background-size: cover; /* firefox */
+            -o-background-size: cover; /* Opera */
+
+            /* Ensure the html element always takes up the full height of the browser window */
+            min-height: 100%;
+
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 1px rgba(0,0,0,.5);
+            
+        }
+
+        #mastlogo {
+            max-width: 100%;
+            height: auto;
+        }
+
+        a, 
+        a:focus, 
+        a:hover {
+            color: #fff;
+        }
+
+        .btn-default,
+        .btn-default:hover,
+        .btn-default:focus {
+            color: #333;
+            text-shadow: none;
+            background-color: #fff;
+            border: 1px solid #fff;
+        }
+
+        /* Extra markup and styles for table-esque vertical and horizontal centering */
+        .site-wrapper {
+            display: table;
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+        }
+
+        .site-wrapper-inner {
+            display: table-cell;
+            vertical-align: auto;
+        }
+
+        .cover-container {
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        /* Padding for spacing */
+        .inner {
+            padding: 30px;
+        }
+
+        .inner.cover {
+            padding-top: 18%;
+            width: 100%;
+        }
+
+        /* Header */
+        .masthead-brand {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            width: 160px;
+            height: auto;
+        }
+
+        .masthead-nav > li {
+            display: inline-block;
+        }
+
+        .masthead-nav > li + li {
+            margin-left: 20px;
+        }
+
+        .masthead-nav > li > a {
+            padding-right: 0;
+            padding-left: 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            color: rgba(255, 255, 255, .95);
+            border-bottom: 2px solid transparant;
+        }
+
+        .masthead-nav > li > a:hover,
+        .masthead-nav > li > a:focus {
+            background-color: transparent;
+            border-bottom-color: #a9a9a9;
+            border-bottom-color: rgba(255, 255, 255, .25);
+        }
+
+        .masthead-nav > .active > a,
+        .masthead-nav > .active > a:hover,
+        .masthead-nav > .active > a:focus {
+            color:  #fff;
+            border-bottom-color: #fff; 
+        }
+
+        @media (min-width: 768px) {
+            .masthead-brand {
+                float: left;
+            }
+            .masthead-nav {
+                float: right;
+            }
+        }
+
+        .cover {
+            padding: 0 20px;
+        }
+        .cover .btn-lg {
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+
+        .mastfoot {
+            color: #999;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        @media (min-width: 768px) {
+            /* Pull out the header and footer */
+            .masthead {
+                postion: fixed;
+                top: 0;
+            }
+            .mastfoot {
+                position: fixed;
+                bottom: 0;
+            }
+
+            /* Start the vertical centering */
+            .site-wrapper-inner {
+                vertical-align: middle;
+            }
+
+            /* Handle the widths */
+            .masthead,
+            .mastfoot,
+            .cover-container {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .masthead,
+            .mastfoot,
+            .cover-container {
+                width: 700px;
+            }
+        }
+
     </style>
-</head>
-<body>
 
-    <div id='map'></div>
+{% endblock %}
+{% block body %}
 
-    <script>
-    L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
+<!-- Get starting location or Nav to map -->    
+    <div class="site-wrapper">
+        <div class="site-wrapper-inner">
+            <div class="cover-container">
+                <div class="msthead clearfix">
+                    <div class="inner">
+                        <a href="/"><img src="/static/img/logo-1.png" class="masthead-brand" alt="Weekend Wanderlust"></a>
 
-    var map = L.mapbox.map('map', 'mapbox.streets')
-        .setView([37.75, -122.327], 12)
-        .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
+                        <ul class="nav masthead-nav">
+                            <li class="active">
+                                <a href="/">Home</a>
+                            </li>
 
-    map.featureLayer.on('click', function(e) {
-        map.panTo(e.getLatLng());
-    });
+                            <li>
+                                <a href="/weekend-wanderlust">Explore</a>
+                            </li>
 
-    // initialize a featureLayer with Map ID and pull the features down:
-    L.mapbox.featureLayer('terriwlee.p3o5adlc').addTo(map);
-    // behind the scene: download with AJAX and 'ready' event is fired when it's completed.  
+                            <li>
+                                <a href="#">Login</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
+                <div class="inner cover">
+                    <div><img src="/static/img/statement-1.png" alt="Weekend Wanderlust" align="middle" id="mastlogo"></div><br><br>
+<!--                     <h2 class="cover-heading">Live Your Weekend Adventure.</h2>
+ -->
+                    <p class="lead">An interactive map for weekend explorers in San Francisco Bay Area 
+                    <small><br>
+                    Upcoming events, nearby hiddengems, outdoor escapes and more.</small>
+                    </p><br>
+
+                    <p class="lead"><a class="btn btn-lg btn-info" href="/weekend-wanderlust">Explore the Map</a></p>
+                </div>
+
+                <div class="mastfoot">
+                    <div class="inner">
+                        <p><small>Designed and developed by </small><a href="https://twitter.com/terriwonglee"><small>Terri W.  </small></a>
+                        <small>Built at </small><a href="https://hackbrightacademy.com/"><small>Hackbright Academy.</small></a></p>
+                        <p>2016 Weekend Wanderlust. All Rights Reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     
 
-    </script>    
-</body>
-</html>
+
+        <!-- Empty -->
+
+        <div class="col-sm-8">
+
+        </div>
+
+    </div>
+
+{% endblock %}

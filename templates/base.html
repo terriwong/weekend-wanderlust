@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+
+    <title>Weekend Wanderlust</title>
+
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Nunito:300'
+          rel='stylesheet' type='text/css'> 
+    <link href="/static/wwm.css" rel="stylesheet">
+
+  {% block head %}
+      <!-- put extra CSS/JS here -->
+  {% endblock %}
+
+</head>
+<body>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+{% block body %}
+{% endblock %}
+
+</body>
+</html>
