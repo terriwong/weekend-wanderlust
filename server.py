@@ -1,7 +1,7 @@
 """Weekend Wanderlust - Interactive Map & Weekend Trip Planner."""
 
 from jinja2 import StrictUndefined
-from flask import Flask, render_template, jsonify, flash, redirect
+from flask import Flask, render_template, jsonify, flash, redirect, request, session
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import connect_to_db, Marker
@@ -38,12 +38,12 @@ def send_features():
     return app.send_static_file("features-20160210.geojson")
 
 
-# file contains all markers geojsonj
-@app.route('/events0215.geojson')
-def marker_info():
-    """Testing: Geojson marker information from database."""
+# geojson for event layer
+@app.route('/events.geojson')
+def events_json():
+    """Geojson of markers for event layer."""
 
-    geojson = {
+    e_geojson = {
                 "type": "FeatureCollection",
                 "features": [
                     {
@@ -58,9 +58,10 @@ def marker_info():
                         "img_url": marker.img_url,
                         "event_url": marker.event_url,
                         "description": marker.description,
+                        "category": marker.category,
                         "marker-type": marker.marker_type,
                         "marker-symbol": marker.marker_symbol,
-                        "marker-color": "#33cccc"
+                        "marker-color": marker.marker_color
                         },
                     "geometry": {
                         "coordinates": [
@@ -70,21 +71,64 @@ def marker_info():
                     },
                     "id": marker.marker_id
                     }
-                for marker in Marker.query.all()
+                for marker in Marker.query.filter(Marker.marker_type == 'event').all()
                 ]
             }
 
-    return jsonify(geojson)
+    return jsonify(e_geojson)
 
+
+# geojson for hiddengem layer
+@app.route('/hiddengems.geojson')
+def hiddengems_json():
+    """Geojson of markers for hiddengem layer."""
+
+    h_geojson = {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                    "type": "Feature",
+                    "properties": {
+                        "title": marker.title,
+                        "date": marker.date,
+                        "time": marker.time,
+                        "name": marker.name,
+                        "address": marker.address,
+                        "cost": marker.cost,
+                        "img_url": marker.img_url,
+                        "event_url": marker.event_url,
+                        "description": marker.description,
+                        "category": marker.category,
+                        "marker-type": marker.marker_type,
+                        "marker-symbol": marker.marker_symbol,
+                        "marker-color": marker.marker_color
+                        },
+                    "geometry": {
+                        "coordinates": [
+                            marker.longitude,
+                            marker.latitude],
+                        "type": "Point"
+                    },
+                    "id": marker.marker_id
+                    }
+                for marker in Marker.query.filter(Marker.marker_type == 'hiddengem').all()
+                ]
+            }
+
+    return jsonify(h_geojson)
 
 # @app.route('/trip/<int:trip_id') # parallax scrolling helps story-telling
 
-@app.route('/add_marker_to_trip', methods=['GET', 'POST'])
+
+@app.route('/add_waypoint', methods=['GET'])
 def add_marker_to_trip():
 
-    flash("Added to trip!")
+    waypoint_id = request.args.get("selected_marker_id")
+    session['waypoints'].append(waypoint_id)
 
-    return redirect("/weekend-wanderlust")
+    # flash("Added to trip!")
+
+    redirect("/weekend-wanderlust")
 
 #---------------------------------#
 

@@ -37,7 +37,8 @@ def load_events(file):
                             event_url=row[12],
                             category=row[13],
                             marker_type=row[14],
-                            marker_symbol=row[15])
+                            marker_symbol=row[15],
+                            marker_color=row[16])
 
             db.session.add(marker)
 
@@ -85,5 +86,5 @@ if __name__ == '__main__':
     connect_to_db(app)
     db.create_all()
 
-    load_events('data/funcheap-weekend-20160215.csv')
+    load_events('data/markers-20160217.csv')
     # load_hiddengems()

@@ -31,6 +31,7 @@ class Marker(db.Model):
     category = db.Column(db.String(64), nullable=False)
     marker_type = db.Column(db.String(64), nullable=False)
     marker_symbol = db.Column(db.String(64), nullable=True)
+    marker_color = db.Column(db.String(64))
 
     def __repr__(self):
         """Clear representation of marker."""

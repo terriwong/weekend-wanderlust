@@ -31,27 +31,39 @@
     height: 22px;
     left: 10px;
     top: 20px;
-    background-color: #ffcc66;
     color: white; 
     text-align: center;
     padding-top: 8px;
     font-size: 14px;
     }
 
+    .disable {
+      display: none;
+    }
+
+    #gems {
+    background-color: #7C5852;
+    }
+
+    #start {
+    background-color: #33cccc;
+/*    display: none;
+*/    }
+
     pre.ui-coordinates {
-  background:rgba(0,0,0,0.5);
-  position:absolute;
-  bottom:10px;
-  left:10px;
-/*  padding:5px 10px; */  
-  color:#fff;
-  font-size:11px;
-  line-height:18px;
-  border-radius:3px;
-  max-height:90%;
-  overflow:auto;
-  width:315px;
-  }
+    background:rgba(0,0,0,0.5);
+    position:absolute;
+    bottom:10px;
+    left:10px;
+  /*  padding:5px 10px; */  
+    color:#fff;
+    font-size:11px;
+    line-height:18px;
+    border-radius:3px;
+    max-height:90%;
+    overflow:auto;
+    width:315px;
+    }
 
 /*  .listCard {
     background-color: transparent;
@@ -89,9 +101,11 @@
     font-size: 12px;
   }
 
-  #container form {
-    padding-left: 15px;
-    padding-right: 15px;
+  #container button {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
   }
 
  div {
@@ -139,22 +153,72 @@
       color:#FFF;
       }
 
+    #trip-panel {
+      position: absolute;
+      width: 240px;
+      background:rgba(0,0,0,0.5);
+      color: white;
+      right: 10px; bottom: 20px;
+      overflow: auto;
+      margin: 0;
+      padding: 5px;
+      max-height: 50%;
+      font-family: 'Nunito', sans-serif;  
+      font-weight: 300;
+      font-size: 12px;
+    }
 
+    #waypoint-list {
+
+    }
+
+    #waypoint-list li {
+      padding: 5px;
+      margin-left:20px;
+/*      list-style-type: none;
+*/    }
+
+    #waypoint-list li:hover {
+      background: rgba(0,0,0,0.5);
+    }
+
+    #trip-form {
+      padding: 10px;
+    }
 
     </style>
 </head>
 <body>
 <nav id='menu-ui' class='menu-ui'>
-    <a href='#' class='active' id='filter-all'>All</a>
-    <a href='#' id='filter-event'>This Weekend Events</a>
-    <a href='#' id='filter-coffee'>Hiddengems</a>
+    <a href='#' class='active' id='filter-all'>This Weekend Events - ALL</a>
+    <a href='#' id='filter-fairs'>Fairs & Festivals</a>
+    <a href='#' id='filter-arts'>Art & Museums</a>
 </nav>
 <div id='map'></div>
-<div class='label'><b>Hiddengem in View</b></div>
+<div class='label' id='gems'><b>Hiddengems nearby</b></div>
+<div class='label' id='start'><b>Click an event to uncover hiddengems</b></div>
 <pre id='coordinates' class='ui-coordinates'></pre>
 
-    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
-    <script>
+<div id="trip-panel">
+<div>Trip Planner Panel<div> 
+<ol id='waypoint-list'><b>Selected waypoints:</b></ol>
+<form action="/save_trip" method="POST">
+  Way of traveling:<br>
+  <input type="radio" name="profile" value="walking">Walking
+  <input type="radio" name="profile" value="cycling">Biking
+  <input type="radio" name="profile" value="driving">Driving<br>
+<!--   Waypoint 1: <input type="text" id="1" value=""><br>
+  Waypoint 2: <input type="text" id="2" value=""><br>
+  Waypoint 3: <input type="text" id="3" value=""><br>
+  Waypoint 4: <input type="text" id="4" value=""><br>
+  Waypoint 5: <input type="text" id="5" value=""><br>
+ -->  <button>Show routing</button>
+  <input type="submit" name="savetrip" value="Save trip">
+</form>
+</div> 
+
+<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script>
 
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
@@ -165,11 +229,19 @@
 
     var eventLayer = L.mapbox.featureLayer().addTo(map);
 
-    eventLayer.loadURL('/events0215.geojson');
+    eventLayer.loadURL('/events.geojson');
 
     var hiddengemLayer = L.mapbox.featureLayer().addTo(map);
+    // hiddengemLayer.loadURL('/features-20160210.geojson');
 
-    hiddengemLayer.loadURL('/features-20160210.geojson');
+    // on click, zoom in and show nearby hiddengems
+    eventLayer.on('click', function(e) {
+        map.panTo(e.layer.getLatLng());
+        map.setView(e.latlng, 14);
+        hiddengemLayer.loadURL('/hiddengems.geojson');
+        document.getElementById('start').className = "label disable";        
+    }); 
+
 
     map.on('move', function() {
       $('#coordinates').empty();
@@ -177,20 +249,20 @@
 
       hiddengemLayer.eachLayer(function(marker) {
         if (bounds.contains(marker.getLatLng())) {
-          var listContent = '<div id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '"><img id="listImg" src="' + marker.feature.properties.img_url + '" />' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p><form id="addToTrip"  action="/add_marker_to_trip" method="post" name="add_marker_to_trip"><input type="hidden" name="selected_marker_id" value=' + marker.feature.id + '><input type="submit" value="Add To Trip" /></form><br></div>';
+          var listContent = '<div id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '"><img id="listImg" src="' + marker.feature.properties.img_url + '" />' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '<br></p><br></div>';
             
             document.getElementById('coordinates').innerHTML += listContent;
         }
+        
+        // when mouseover, dim the background and show corresponding marker
         $("#coordinates div").hover(
         function(){ // mouseenter
           $(this).addClass("hover");
-          // console.log("data.latlng:", this.dataset.latlng);
-          // console.log("data.id:", this.dataset.id);
-          // console.log(marker);
           var target = this.dataset.id;
-          console.log(target);
+          // console.log(target);
           hiddengemLayer.eachLayer(function(marker){
-            if (marker.feature.id === target) {
+            // console.log(target);
+            if (marker.feature.id == target) {
               marker.openPopup();
             }
           });
@@ -198,105 +270,91 @@
         function(){ // mouseleave
           $(this).removeClass("hover");
         }); 
-        });
-
-      //   $("#coordinates div").hover(
-      //   function(){ // mouseenter
-      //     $(this).addClass("hover");
-      //     console.log("data.latlng:", this.dataset.latlng);
-      //     console.log("data.id:", this.dataset.id);
-      //     marker.openPopup();
-      //   }, 
-      //   function(){ // mouseleave
-      //     $(this).removeClass("hover");
-      //   });   
-      // });
-  });
+      });
+    });
 
 
-    // on click, zoom in and show nearby
-    eventLayer.on('click', function(e) {
-        map.panTo(e.layer.getLatLng());
-        map.setView(e.latlng, 14);        
-    }); 
+    
 
-    // customize popup content
+    // customize hiddengem popup content
     hiddengemLayer.on('layeradd', function(e) {
         var marker = e.layer,
             feature = marker.feature;
 
-        if (feature.properties.type === 'event') {
-            var popupContent = '<a target="_blank" class="popup" href="' + feature.properties.event_url + '">' + '<img id=popupimg src="' + feature.properties.img_url + '" />' + '<b>' + feature.properties.title + '</b>' + '</a>' + '<br>' + feature.properties.date + ' | ' + feature.properties.time + '<br><form action="/add_marker_to_trip" method="post" name="add_marker_to_trip"><input type="hidden" name="selected_marker_id" value=' + feature.id + '><input type="submit" value="Add To Trip" /></form>';
-        } else {
-            popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.description + '<br><form action="/add_marker_to_trip" method="post" name="add_marker_to_trip"><input type="hidden" name="selected_marker_id" value=' + feature.id + '><input type="submit" value="Add To Trip" /></form>'; 
-        }
-
+        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button>'; 
+        
         marker.bindPopup(popupContent, {
             closeButton: false,
             minWidth: 120
             });
     });
 
-    // show tooltips on hover
+    // customize event popup content
+    eventLayer.on('layeradd', function(e) {
+        var marker = e.layer,
+            feature = marker.feature;
+
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><br><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button>'; 
+        
+        marker.bindPopup(popupContent, {
+            closeButton: false,
+            minWidth: 120
+            });
+    });
+
+
+    // show tooltips on mouseover onto event marker
     eventLayer.on('mouseover', function(e) {
         e.layer.openPopup();
     });
 
-    // $(document).ready(function(){
-      // $("#coordinates div").click(function(){
-        // var data = $(this).dataset.id;
-        // alert("clicked!");
-          // var data = $(this).dataset.id;
-          // hiddengemLayer.eachLayer(function(layer){
-          //   if (data === layer.feature.id) {
-          //     layer.openPopup();
-          //   }
-          // });
-    //     });
-    // });
+
+    // Toggling layers by event category
+    var all = document.getElementById('filter-all');
+    var fairs = document.getElementById('filter-fairs');
+    var arts = document.getElementById('filter-arts');
+
+    fairs.onclick = function(e) {
+        all.className = '';
+        arts.className = '';
+        this.className = 'active';
+        eventLayer.setFilter(function(f) {
+            return f.properties['category'] === 'Fairs & Festivals';
+        });
+        return false;
+    };
+
+    arts.onclick = function(e) {
+        all.className = '';
+        fairs.className = '';
+        this.className = 'active';
+        eventLayer.setFilter(function(f) {
+            return f.properties['category'] === 'Art & Museums';
+        });
+        return false;
+    };
+
+    all.onclick = function() {
+        fairs.className = '';
+        arts.className = '';
+        this.className = 'active';
+        eventLayer.setFilter(function(f) {
+            return true;
+        });
+        return false;
+    };
 
 
-    // $('#map').on('click', '.add-to-trip-btn', function(){
-    //   alert('Added to trip!');
-    // });
-
-
-    // Toggling layers
-    // all = document.getElementById('filter-all'),
-    // events = document.getElementById('filter-event'),
-    // coffee = document.getElementById('filter-coffee');
-
-    // events.onclick = function(e) {
-    //     all.className = '';
-    //     coffee.className = '';
-    //     this.className = 'active';
-    //     eventLayer.setFilter(function(f) {
-    //         return f.properties['marker-type'] === 'event';
-    //     });
-    //     return false;
-    // };
-
-    // coffee.onclick = function() {
-    //     all.className = '';
-    //     events.className = '';
-    //     this.className = 'active';
-    //     hiddengemLayer.setFilter(function(f) {
-    //         return f.properties['type'] === 'Coffee';
-    //     });
-    //     return false;
-    // };
-
-    // all.onclick = function() {
-    //     events.className = '';
-    //     coffee.className = '';
-    //     this.className = 'active';
-    //     hiddengemLayer.setFilter(function(f) {
-    //         return true;
-    //     });
-    //     return false;
-    // };
-
+    // "add to trip" in action
+    // The HTML doesn't exist yet, so we can't just say $('#mybutton'). Instead, we listen for click events on the map element which will bubble up from the tooltip, once it's created and someone clicks on it.
+    $('#map').on('click', '.trigger', function(){
+      console.log(this.dataset.id);
+      var unsavedTrip = document.getElementById('waypoint-list');
+      var waypointList = '<li>' + this.dataset.name + '</li>';
+      unsavedTrip.innerHTML += waypointList;
+      // alert('Added to trip!');
+    });
     
-    </script>    
+</script>    
 </body>
 </html>
