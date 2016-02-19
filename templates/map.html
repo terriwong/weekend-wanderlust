@@ -27,7 +27,7 @@
 
     .label {
     position: absolute;     
-    width: 315px;
+    width: 300px;
     height: 22px;
     left: 10px;
     top: 20px;
@@ -59,10 +59,10 @@
     color:#fff;
     font-size:11px;
     line-height:18px;
-    border-radius:3px;
-    max-height:90%;
+/*    border-radius:3px;
+*/    max-height:90%;
     overflow:auto;
-    width:315px;
+    width:300px;
     }
 
 /*  .listCard {
@@ -200,9 +200,10 @@
 <pre id='coordinates' class='ui-coordinates'></pre>
 
 <div id="trip-panel">
-<div>Trip Planner Panel<div> 
-<ol id='waypoint-list'><b>Selected waypoints:</b></ol>
-<form action="/save_trip" method="POST">
+<div>Trip Planner Panel</div><br> 
+<div><b>Selected waypoints:</b><ol id='waypoint-list'></ol></div>
+<div id='status'></div><br>
+<form action="/save_trip">
   Way of traveling:<br>
   <input type="radio" name="profile" value="walking">Walking
   <input type="radio" name="profile" value="cycling">Biking
@@ -213,7 +214,7 @@
   Waypoint 4: <input type="text" id="4" value=""><br>
   Waypoint 5: <input type="text" id="5" value=""><br>
  -->  <button>Show routing</button>
-  <input type="submit" name="savetrip" value="Save trip">
+  <input type="submit" name="savetrip" id="savetrip" value="Save trip">
 </form>
 </div> 
 
@@ -281,7 +282,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button>'; 
+        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: false,
@@ -294,7 +295,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><br><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button>'; 
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: false,
@@ -345,15 +346,49 @@
     };
 
 
-    // "add to trip" in action
-    // The HTML doesn't exist yet, so we can't just say $('#mybutton'). Instead, we listen for click events on the map element which will bubble up from the tooltip, once it's created and someone clicks on it.
-    $('#map').on('click', '.trigger', function(){
+    // helper function to show "add to trip" status
+    function showStatus(results) {
+      var status = results;
+      $('#status').html(status);
+      console.log("Finished showStatus");
+    }
+
+    function listName(name) {
+      var status = $('#status').html();
+      var board = document.getElementById('waypoint-list');
+      var info = '<li>' + name + '</li>';
+      if ( status == "Added!") {
+        board.innerHTML += info;
+      } 
+    }
+
+    // On click "Add to trip" button in marker popup, check duplicate
+    // and add to session, update status accordingly.
+    // "Add to trip" button: the HTML doesn't exist yet, so we can't just say $('#mybutton'). Instead, we listen for click events on the map element which will bubble up from the tooltip, once it's created and someone clicks on it.
+    $('#map').on('click', '.trigger', function (e){
+      e.preventDefault();
       console.log(this.dataset.id);
-      var unsavedTrip = document.getElementById('waypoint-list');
-      var waypointList = '<li>' + this.dataset.name + '</li>';
-      unsavedTrip.innerHTML += waypointList;
-      // alert('Added to trip!');
+      $.get('/add_waypoint', {'marker_id': this.dataset.id}, showStatus);
+      console.log("Finished sending AJAX to add_waypoint");
+      var status = $('#status').html();
+      if ( status == "Waypoint added to trip!") {
+        var board = document.getElementById('waypoint-list');
+        var info = '<li>' + this.dataset.name + '</li>';
+        board.innerHTML += info;
+      }
+      console.log("Finished add name to list");
     });
+
+
+    // commit to database about saved trip and clear session
+    $('#savetrip').on('click', function(e){
+      e.preventDefault();
+      $('#waypoint-list').empty();
+      console.log("Finished empty status");
+      $.get('/save_trip', showStatus);
+      console.log("Finished save trip");
+    });
+      
     
 </script>    
 </body>

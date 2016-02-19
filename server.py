@@ -38,10 +38,9 @@ def send_features():
     return app.send_static_file("features-20160210.geojson")
 
 
-# geojson for event layer
 @app.route('/events.geojson')
 def events_json():
-    """Geojson of markers for event layer."""
+    """Geojson from database for event layer."""
 
     e_geojson = {
                 "type": "FeatureCollection",
@@ -78,10 +77,10 @@ def events_json():
     return jsonify(e_geojson)
 
 
-# geojson for hiddengem layer
+
 @app.route('/hiddengems.geojson')
 def hiddengems_json():
-    """Geojson of markers for hiddengem layer."""
+    """Geojson from database for hiddengem layer."""
 
     h_geojson = {
                 "type": "FeatureCollection",
@@ -117,18 +116,68 @@ def hiddengems_json():
 
     return jsonify(h_geojson)
 
-# @app.route('/trip/<int:trip_id') # parallax scrolling helps story-telling
-
 
 @app.route('/add_waypoint', methods=['GET'])
-def add_marker_to_trip():
+def add_waypoint():
+    """Add waypoint to session."""
 
-    waypoint_id = request.args.get("selected_marker_id")
-    session['waypoints'].append(waypoint_id)
+    waypoint_id = request.args.get("marker_id")
+    print "this is waypoint id:", waypoint_id
+
+    if 'waypoints' in session:
+        if waypoint_id in session['waypoints']:
+            return "You have already selected it!"
+        else:
+            session['waypoints'].append(waypoint_id)
+            print session
+            return "Waypoint added to trip!"
+    else:
+        session['waypoints'] = [waypoint_id]
+        print session
+        return "Waypoint added to trip!"
+
+    print "session['waypoints']:", session['waypoints']
 
     # flash("Added to trip!")
 
-    redirect("/weekend-wanderlust")
+
+@app.route('/get_waypoint_list')
+def get_waypoint_list_from_session():
+    """Get waypoint id list from session, return info from database."""
+
+    waypoint_list = session['waypoints']
+    print waypoint_list
+    waypoint_name_list = []
+
+    for i in waypoint_list:
+        # print i
+        marker = Marker.query.filter_by(marker_id=int(i)).one()
+        name = marker.name
+        waypoint_name_list.append(name)
+
+    return jsonify(waypoint_name_list)
+
+
+# @app.route('/check_duplicate')
+# def check_duplicate():
+
+
+@app.route('/save_trip')
+def save_trip():
+    """Clear session."""
+
+    # commit waypoint sequence to database before clean
+
+    session['waypoints'] = []
+    print "updated session:", session['waypoints']
+
+    return "Trip saved!"
+
+
+
+
+# @app.route('/trip/<int:trip_id') # parallax scrolling helps story-telling
+
 
 #---------------------------------#
 

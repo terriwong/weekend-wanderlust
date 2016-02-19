@@ -23,7 +23,7 @@ class Marker(db.Model):
     time = db.Column(db.String(64), nullable=True)
     neighborhood = db.Column(db.String(64), nullable=True)  # can be no neighborhood
     city = db.Column(db.String(64), nullable=True)
-    description = db.Column(db.String(500), nullable=True)
+    description = db.Column(db.String(1000), nullable=True)
     cost = db.Column(db.String(64), nullable=True)
     # cost_tier = db.Column(db.String(5), nullable=True)  # for restaurants: number of dollar signs
     img_url = db.Column(db.String(255), nullable=True)
