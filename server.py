@@ -193,10 +193,10 @@ def get_route():
 
     r = requests.get(url)
     r = r.json()
-    geometry = r['routes'][0]['geometry']
-    print "polyline: ", geometry
+    route = r['routes'][0]
+    print "route", route
 
-    return jsonify(geometry)
+    return jsonify(route)
 
 
     # https://api.mapbox.com/v4/directions/{profile}/{waypoints}.json?access_token=MAPBOX_ACCESS_TOKEN
