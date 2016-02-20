@@ -162,7 +162,7 @@
       overflow: auto;
       margin: 0;
       padding: 5px;
-      max-height: 50%;
+      max-height: 80%;
       font-family: 'Nunito', sans-serif;  
       font-weight: 300;
       font-size: 12px;
@@ -186,9 +186,52 @@
       padding: 10px;
     }
 
+    #inputs, #errors, #directions {
+      position: absolute;
+      width: 33.3333%;
+      max-width: 300px;
+      min-width: 200px;
+    }
+
+    #inputs {
+      z-index: 100;
+      top: 10px;
+      right: 30px;
+      width: 300px;
+      height: 200px;
+    }
+
+    #directions {
+      z-index: 99;
+      background: rgba(0,0,0,.8);
+      top: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
+    }
+
+    #errors {
+      z-index: 8;
+      opacity:  0;
+      padding: 10px;
+      border-radius: 0 0 3px 3px;
+      background: rgba(0,0,0,.25);
+      top: 90px;
+      left: 10px;
+    }
+
+    .hide {
+      visibility: hidden;
+    }
+
+    .show {
+      visibility: visible;
+    }
+
     </style>
 </head>
 <body>
+
 <nav id='menu-ui' class='menu-ui'>
     <a href='#' class='active' id='filter-all'>This Weekend Events - ALL</a>
     <a href='#' id='filter-fairs'>Fairs & Festivals</a>
@@ -202,22 +245,31 @@
 <div id="trip-panel">
 <div>Trip Planner Panel</div><br> 
 <div><b>Selected waypoints:</b><ol id='waypoint-list'></ol></div>
+<b>Selected travel profile: </b><div id="selected-profile"></div><br>
 <div id='status'></div><br>
-<form action="/save_trip">
+<form action="/get_profile">
   Way of traveling:<br>
   <input type="radio" name="profile" value="walking">Walking
-  <input type="radio" name="profile" value="cycling">Biking
+  <input type="radio" name="profile" value="cycling">Cycling
   <input type="radio" name="profile" value="driving">Driving<br>
-<!--   Waypoint 1: <input type="text" id="1" value=""><br>
-  Waypoint 2: <input type="text" id="2" value=""><br>
-  Waypoint 3: <input type="text" id="3" value=""><br>
-  Waypoint 4: <input type="text" id="4" value=""><br>
-  Waypoint 5: <input type="text" id="5" value=""><br>
- -->  <button>Show routing</button>
-  <input type="submit" name="savetrip" id="savetrip" value="Save trip">
-</form>
+</form><br>
+
+<button id="get-route">Show geojson route</button>
+<button id="clear-route">Clear route</button><br>
+<button id="add-path">Add polyline path(test)</button>
+<button id="remove-path">Remove path</button>
+<button id="clear-session">Clear session</button>
 </div> 
 
+<!-- <div id='inputs' class='hide'></div>
+<div id='errors' class='hide'></div>
+<div id='directions' class='hide'>
+  <div id='routes'></div>
+  <div id='instructions'></div>
+</div> -->
+
+<script src='https://api.mapbox.com/mapbox.js/plugins/mapbox-directions.js/v0.4.0/mapbox.directions.js'></script>
+<link rel='stylesheet' href='/static/directions.css' type='text/css' />
 <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
 
@@ -274,8 +326,6 @@
       });
     });
 
-
-    
 
     // customize hiddengem popup content
     hiddengemLayer.on('layeradd', function(e) {
@@ -345,22 +395,77 @@
         return false;
     };
 
+    // helper function to update the waypoint list
+    function updateList(results) {
+      var board = document.getElementById('waypoint-list');
+      var info = '<li>' + results + '</li>';
+      board.innerHTML += info;
+    }
 
     // helper function to show "add to trip" status
     function showStatus(results) {
       var status = results;
       $('#status').html(status);
       console.log("Finished showStatus");
+      if (status == "Waypoint added to trip!") {
+        $.get('/update_waypoint_list', updateList);
+        console.log("Finished update list");
+      }
     }
 
-    function listName(name) {
-      var status = $('#status').html();
-      var board = document.getElementById('waypoint-list');
-      var info = '<li>' + name + '</li>';
-      if ( status == "Added!") {
-        board.innerHTML += info;
-      } 
+    // helper function to update travel profile on planner panel
+    function updateProfile(results) {
+      var profile = results;
+      $('#selected-profile').html(profile);
+      console.log("Finished update profile")
     }
+
+    
+    var routeLayer = L.geoJson().addTo(map);
+    
+    // helper function to show route
+    function showRoute(results) {
+      // var polyline = L.polyline(results, {color:"#ff7800", "weight": 5, "opacity": 0.65 }).addTo(map);
+      // map.fitBounds(polyline, getBounds());
+
+      // if (map.hasLayer(routeLayer)) {
+      //   map.removeLayer(routeLayer);
+      //   console.log("Finished clear map");
+      // } else {
+      //   var routeLayer = L.geoJson().addTo(map);
+
+        var myLines = results;
+        // var routeLayer = L.geoJson().addTo(map); 
+        routeLayer.addData(myLines);
+        routeLayer.setStyle({
+          "color": "#ff7800",
+          "weight": 5,
+          "opacity": 0.65 });
+        console.log("Finished add routeLayer");
+      }
+    //   console.log("Finished show route");
+    // };
+
+    $('#add-path').on('click', function addPath() {
+      // console.log(results);
+      var coordinates = results.coordinates;
+      var line_points = coordsToLatLng
+      // console.log(results.summary);
+      var polyline_options = {
+        stroke: true,
+        color: 'red',
+        weight: 5,
+        opacity: 0.65,
+        fill: true,
+        lineJoin: "round",
+        lineCap: "round",
+        clickable: true,
+        className: "path"
+      };
+      var polyline = L.polygon(line_points, polyline_options).addTo(map);
+      console.log("Finished add path");
+    });
+
 
     // On click "Add to trip" button in marker popup, check duplicate
     // and add to session, update status accordingly.
@@ -370,26 +475,72 @@
       console.log(this.dataset.id);
       $.get('/add_waypoint', {'marker_id': this.dataset.id}, showStatus);
       console.log("Finished sending AJAX to add_waypoint");
-      var status = $('#status').html();
-      if ( status == "Waypoint added to trip!") {
-        var board = document.getElementById('waypoint-list');
-        var info = '<li>' + this.dataset.name + '</li>';
-        board.innerHTML += info;
-      }
-      console.log("Finished add name to list");
     });
 
 
-    // commit to database about saved trip and clear session
-    $('#savetrip').on('click', function(e){
+    // get or update travel profile by clicking radio button
+    $('input[name$="profile"]').click(function() {
+      var profile = $(this).val();
+      $.get('/get_profile', {'profile': profile}, updateProfile);
+    });
+
+
+    // get directions using mapbox directions api
+    $('#get-route').on('click', function(e) {
+      e.preventDefault();
+      $.get('/get_route', showRoute);
+      // document.getElementById('get-route').className="hide";
+      // document.getElementById('re-route').className="show";
+    });
+
+    $('#clear-route').on('click', function(e) {
+      e.preventDefault();
+      if (map.hasLayer(routeLayer)) {
+        // map.removeLayer(routeLayer);}
+        routeLayer.clearLayers();}
+      console.log("Finished remove routeLayer"); 
+    });
+
+    // $('#add-path').on('click', function(e) {
+    //   e.preventDefault();
+    //   $.get('/get_route_polyline', addPath);
+    //   console.log("Finished add path");
+    // });
+
+    $('#remove-path').on('click', function(e) {
+      e.preventDefault();
+    });
+
+
+    // })
+
+      // $.get('/get_directions', {'profile'})
+      // $('nav').hide();
+      // $('#trip-panel').hide();
+      // // Directions
+      // var directions = L.mapbox.directions();
+      // var directionsLayer = L.mapbox.directions.layer(directions).addTo(map);
+      // var directionsInputControl = L.mapbox.directions.inputControl('inputs', directions).addTo(map);
+      // var directionsErrorsControl = L.mapbox.directions.errorsControl('errors', directions).addTo(map);
+      // var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions).addTo(map);
+      // var directionsInstructionsControl = L.mapbox.directions.instructionsControl('instructions', directions).addTo(map);
+      // document.getElementById('inputs').className = "show";
+      // document.getElementById('errors').className = "show";
+      // document.getElementById('directions').className = "show";    
+    // });
+
+
+    // commit to database about saved trip and clear session and waypoints list
+    $('#clear-session').on('click', function(e){
       e.preventDefault();
       $('#waypoint-list').empty();
-      console.log("Finished empty status");
-      $.get('/save_trip', showStatus);
-      console.log("Finished save trip");
+      console.log("Finished empty waypoint list");
+      $('#selected-profile').empty();
+      console.log("Finished empty profile");
+      $.get('/start_over', showStatus);
+      console.log("Finished show status");
     });
-      
-    
+
 </script>    
 </body>
 </html>

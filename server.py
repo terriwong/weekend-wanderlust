@@ -3,6 +3,8 @@
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, jsonify, flash, redirect, request, session
 from flask_debugtoolbar import DebugToolbarExtension
+import os
+import requests
 
 from model import connect_to_db, Marker
 
@@ -125,12 +127,15 @@ def add_waypoint():
     print "this is waypoint id:", waypoint_id
 
     if 'waypoints' in session:
-        if waypoint_id in session['waypoints']:
-            return "You have already selected it!"
+        if len(session['waypoints']) < 12:
+            if waypoint_id in session['waypoints']:
+                return "You have already selected it!"
+            else:
+                session['waypoints'].append(waypoint_id)
+                print session
+                return "Waypoint added to trip!"
         else:
-            session['waypoints'].append(waypoint_id)
-            print session
-            return "Waypoint added to trip!"
+            return "You can't select more than 12 waypoints!"
     else:
         session['waypoints'] = [waypoint_id]
         print session
@@ -141,37 +146,104 @@ def add_waypoint():
     # flash("Added to trip!")
 
 
-@app.route('/get_waypoint_list')
-def get_waypoint_list_from_session():
-    """Get waypoint id list from session, return info from database."""
+@app.route('/update_waypoint_list')
+def update_waypoint_list():
+    """Get newly added waypoint id, return name from database."""
 
+    print "current session:", session['waypoints']
     waypoint_list = session['waypoints']
-    print waypoint_list
-    waypoint_name_list = []
+    new_waypoint_id = waypoint_list[-1]
+    marker = Marker.query.filter_by(marker_id=new_waypoint_id).first()
+    waypoint_name = marker.name
 
-    for i in waypoint_list:
-        # print i
-        marker = Marker.query.filter_by(marker_id=int(i)).one()
-        name = marker.name
-        waypoint_name_list.append(name)
-
-    return jsonify(waypoint_name_list)
+    return waypoint_name
 
 
-# @app.route('/check_duplicate')
-# def check_duplicate():
+@app.route('/get_profile')
+def get_profile():
+    """Get profile, store new or update in session."""
+
+    profile = request.args.get("profile")
+
+    session['profile'] = profile
+    print "profile in session: ", session['profile']
+
+    return profile
 
 
-@app.route('/save_trip')
+@app.route('/get_route')
+def get_route():
+    """Use travel profile and waypoints in session, get route's line points."""
+
+    profile = "mapbox." + str(session['profile'])
+    waypoints_id_list = session['waypoints']
+    latlngs = ""
+
+    for i in waypoints_id_list:
+        marker = Marker.query.filter_by(marker_id=i).one()
+        lon = marker.longitude
+        lat = marker.latitude
+        latlngs += (lon + "," + lat + ";")
+
+    waypoints = latlngs[:-1]
+
+    access_token = os.environ['MAPBOX_ACCESS_TOKEN']
+
+    url = "https://api.mapbox.com/v4/directions/" + profile + "/" + waypoints + ".json?alternatives=false&instructions=text&geometry=geojson&steps=false&&access_token=" + access_token
+
+    r = requests.get(url)
+    r = r.json()
+    geometry = r['routes'][0]['geometry']
+    print "polyline: ", geometry
+
+    return jsonify(geometry)
+
+
+    # https://api.mapbox.com/v4/directions/{profile}/{waypoints}.json?access_token=MAPBOX_ACCESS_TOKEN
+    # https://api.mapbox.com/v4/directions/cycling/-122.4114577,37.759332;-122.4026674,37.7706699;-122.4088275,37.7713244.json?alternatives=false&instructions=html&geometry=polyline&steps=false$access_token=pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ
+    # https://api.mapbox.com/v4/directions/mapbox.driving/-122.42,37.78;-77.03,38.91.json?alternatives=false&instructions=html&geometry=geojson&steps=false&&access_token=pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ
+
+
+@app.route('/get_route_polyline')
+def get_route_polyline():
+    """Use travel profile and waypoints in session, get route's polyline geometry."""
+
+    profile = "mapbox." + str(session['profile'])
+    waypoints_id_list = session['waypoints']
+    latlngs = ""
+
+    for i in waypoints_id_list:
+        marker = Marker.query.filter_by(marker_id=i).one()
+        lon = marker.longitude
+        lat = marker.latitude
+        latlngs += (lon + "," + lat + ";")
+
+    waypoints = latlngs[:-1]
+
+    access_token = os.environ['MAPBOX_ACCESS_TOKEN']
+
+    url = "https://api.mapbox.com/v4/directions/" + profile + "/" + waypoints + ".json?alternatives=false&instructions=text&geometry=polyline&steps=true&&access_token=" + access_token
+
+    r = requests.get(url)
+    r = r.json()
+    route = r['routes'][0]
+    print "route: ", route
+
+    return url
+
+
+
+@app.route('/start_over')
 def save_trip():
     """Clear session."""
 
     # commit waypoint sequence to database before clean
 
     session['waypoints'] = []
-    print "updated session:", session['waypoints']
+    session['profile'] = ""
+    print "updated session:", session
 
-    return "Trip saved!"
+    return "Session cleared!"
 
 
 
