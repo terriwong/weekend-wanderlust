@@ -5,6 +5,7 @@ from flask import Flask, render_template, jsonify, flash, redirect, request, ses
 from flask_debugtoolbar import DebugToolbarExtension
 import os
 import requests
+from polyline.codec import PolylineCodec
 
 from model import connect_to_db, Marker
 
@@ -201,7 +202,7 @@ def get_route():
 
     # https://api.mapbox.com/v4/directions/{profile}/{waypoints}.json?access_token=MAPBOX_ACCESS_TOKEN
     # https://api.mapbox.com/v4/directions/cycling/-122.4114577,37.759332;-122.4026674,37.7706699;-122.4088275,37.7713244.json?alternatives=false&instructions=html&geometry=polyline&steps=false$access_token=pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ
-    # https://api.mapbox.com/v4/directions/mapbox.driving/-122.42,37.78;-77.03,38.91.json?alternatives=false&instructions=html&geometry=geojson&steps=false&&access_token=pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ
+    # https://api.mapbox.com/v4/directions/mapbox.driving/-122.42,37.78;-77.03,38.91.json?alternatives=false&instructions=html&geometry=polyline&steps=false&&access_token=pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ
 
 
 @app.route('/get_route_polyline')
@@ -226,11 +227,12 @@ def get_route_polyline():
 
     r = requests.get(url)
     r = r.json()
-    route = r['routes'][0]
-    print "route: ", route
+    geometry = r['routes'][0]['geometry']
+    latlngs = PolylineCodec().decode(geometry)
+    geometry = {'geometry': latlngs}
+    print geometry
 
-    return url
-
+    return jsonify(geometry)
 
 
 @app.route('/start_over')
