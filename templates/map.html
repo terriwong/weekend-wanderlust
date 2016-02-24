@@ -52,6 +52,11 @@
 /*    display: none;
 */    }
 
+    #explorer {
+    background-color: #33cccc;
+/*    display: none;
+*/    }
+
     pre.ui-coordinates {
     background:rgba(0,0,0,0.5);
     position:absolute;
@@ -125,7 +130,7 @@
   top:10px;right:10px;
   z-index:1;
   border-radius:3px;
-  width:22%;
+  width:20%;
   border:1px solid rgba(0,0,0,0.4);
   }
   .menu-ui a {
@@ -188,40 +193,6 @@
       padding: 10px;
     }
 
-    #inputs, #errors, #directions {
-      position: absolute;
-      width: 33.3333%;
-      max-width: 300px;
-      min-width: 200px;
-    }
-
-    #inputs {
-      z-index: 100;
-      top: 10px;
-      right: 30px;
-      width: 300px;
-      height: 200px;
-    }
-
-    #directions {
-      z-index: 99;
-      background: rgba(0,0,0,.8);
-      top: 0;
-      right: 0;
-      bottom: 0;
-      overflow: auto;
-    }
-
-    #errors {
-      z-index: 8;
-      opacity:  0;
-      padding: 10px;
-      border-radius: 0 0 3px 3px;
-      background: rgba(0,0,0,.25);
-      top: 90px;
-      left: 10px;
-    }
-
     .hide {
       visibility: hidden;
     }
@@ -230,13 +201,17 @@
       visibility: visible;
     }
 
+    .inline {
+      display: inline;
+    }
+
 /*    .sidebar {
       width: 33.3333%;
     }
 */
     .pad2 {
-      padding: 20px;
-      background: rgba(255,255,255,.5);
+/*      padding: 20px;
+*/      background: rgba(255,255,255,.5);
       border-style: hidden;
       -webkit-box-sizing:border-box;
       -moz-box-sizing:border-box;
@@ -264,15 +239,23 @@
 </nav>
 </div>
 <div id='map' class='map pad2'></div>
-<div class='label' id='gems'><b>Hiddengems nearby</b></div>
 <div class='label' id='start'><b>Click an event to uncover hiddengems</b></div>
+<div class='label hide' id='gems'><b>Hiddengems nearby</b></div>
+<div class='label hide' id='explorer'><b>Explorer mode</b></div>
+
+
 <pre id='coordinates' class='ui-coordinates'></pre>
 
 <div id="trip-panel">
 <div>Trip Planner Panel</div><br> 
 <div><b>Selected waypoints:</b><ol id='waypoint-list'></ol></div>
-<b>Selected travel profile: </b><div id="selected-profile"></div><br>
-<div id='status'></div><br>
+<b>Selected travel profile: </b><div id="selected-profile" class="inline"></div><br>
+<div>
+  <b>Distance: </b><div id="distance" class="inline"></div><br>
+  <b>Estimated time: </b><div id="duration" class="inline"></div><br>
+  <div>There are <div id="counter"></div> hiddengems within 1 mile.</div>
+</div>
+<br><div id='status'></div><br>
 <form action="/get_profile">
   Way of traveling:<br>
   <input type="radio" name="profile" value="walking">Walking
@@ -283,19 +266,12 @@
 <button id="get-route">Show route</button>
 <button id="clear-route">Clear route</button>
 <button id="clear-session">Clear session</button><br>
-<!-- <button id="add-path">Add polyline path(test)</button>
-<button id="remove-path">Remove path</button>
- -->
-<button id="show-circle">Show circle</button>
+
+<button id="show-circle">1 mile circle</button>
+<button id="remove-circle">remove circle</button>
 <button id="turf-buffer">Turf buffer</button>
 </div> 
 
-<!-- <div id='inputs' class='hide'></div>
-<div id='errors' class='hide'></div>
-<div id='directions' class='hide'>
-  <div id='routes'></div>
-  <div id='instructions'></div>
-</div> -->
 <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.js'></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/mapbox-directions.js/v0.4.0/mapbox.directions.js'></script>
 <link rel='stylesheet' href='/static/directions.css' type='text/css' />
@@ -304,30 +280,36 @@
 
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
-    var pt = turf.point([37.748457761603355, -122.4326705932617], {
-            "description": "explorer!",
-            "marker-color": "#6BC65F",
-            "marker-size": "large",
-            "marker-symbol": "pitch"
-          });
-    console.log(pt);
-
     // load base map, set initial position, add search controller.
     var map = L.mapbox.map('map', 'mapbox.streets')
         .setView([37.75, -122.327], 12)
         .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
     var eventLayer = L.mapbox.featureLayer().addTo(map);
-
     eventLayer.loadURL('/events.geojson');
 
     var hiddengemLayer = L.mapbox.featureLayer().addTo(map);
     // hiddengemLayer.loadURL('/features-20160210.geojson');
 
-    var ptLayer = L.mapbox.featureLayer().addTo(map);
+    // // 1 mile(1610m) radius circle for showWithin
+    // var RADIUS = 1610;
+    // var filterCircle_options = {
+    //       color: "#33cccc",
+    //       opacity: 1,
+    //       weight: 1.5,
+    //       fillOpacity: 0.1
+    //     };
+    // var filterCircle = L.circle([0,0], RADIUS, filterCircle_options).addTo(map);
 
+    // on click, zoom in and show nearby hiddengems
+    eventLayer.on('click', function(e) {
+        map.panTo(e.latlng);
+        map.setView(e.latlng, 14);
+        hiddengemLayer.loadURL('/hiddengems.geojson');
+        document.getElementById('gems').className = "label show";
+      });
 
-    // create 1 mile radius circle for show-circle
+    // 1 mile radius circle for showWithin
     var RADIUS = 1610;
     var filterCircle_options = {
           color: "#33cccc",
@@ -337,32 +319,60 @@
         };
     var filterCircle = L.circle([0,0], RADIUS, filterCircle_options).addTo(map);
 
-    // use turf.buffer to create circle
-    // var bufferLayer = L.mapbox.featureLayer().addTo(map);
-
-    // function showWithin(results) {
-    //     var points = results;
-    //     var ptsWithin = turf.within(points, filterCircle);
-    //     // ptsWithin.addTo(map);
-    // }
-
-    // on click, zoom in and show nearby hiddengems
-    eventLayer.on('click', function(e) {
-        var currentLatLng = e.layer.getLatLng();
-        // map.panTo(currentLatLng);
-        map.setView(e.latlng, 14);
-        hiddengemLayer.loadURL('/hiddengems.geojson');
-        document.getElementById('start').className = "label disable";
+    function addDraggableMarker(e) {
+      var marker = L.marker(new L.LatLng(e.latlng), {
+        icon: L.mapbox.marker.icon({
+          'marker-color': 'ff8888'
+        }),
+        draggable: true
       });
+    }
 
-    // show 1 mile radius circle from wherever mouse click
+    // var counter = 0;
+
+    function countWithin(e) {
+      var counter = 0;
+      hiddengemLayer.eachLayer(function(marker) {
+        if (e.latlng.distanceTo(L.latLng(
+          marker.feature.geometry.coordinates[1], marker.feature.geometry.coordinates[0])) < RADIUS) {
+          counter += 1;
+        }
+      });
+      document.getElementById('counter').innerHTML = counter;
+    }
+
+    // show 1 mile radius circle on mousemove or mouseclick
     $('#show-circle').on('click', function() {
-      map.on('click', function(e) {
+      map.on('mousemove', function(e) {
+      countWithin(e);
       filterCircle.setLatLng(e.latlng);
-      poly_fc = turf.featurecollection([e.toGeoJSON()]);
-
-
+      hiddengemLayer.loadURL('/hiddengems.geojson');
+      hiddengemLayer.setFilter(function showWithin(feature) {
+        return e.latlng.distanceTo(L.latLng(
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0])) < RADIUS;
+        });
+      map.on('click', function(e) {
+        countWithin(e);
+        map.off("mousemove");
+        filterCircle.setLatLng(e.latlng);
+        hiddengemLayer.loadURL('/hiddengems.geojson');
+        hiddengemLayer.setFilter(function showWithin(feature) {
+        return e.latlng.distanceTo(L.latLng(
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0])) < RADIUS;
+          });
+        });
+      // countWithin(e);
       });
+      document.getElementById('explorer').className = "label show";
+    });
+
+    // remove mousemove and reset filterCircle
+    $('#remove-circle').on('click', function() {
+      filterCircle.setLatLng([0,0]);
+      map.off("mousemove");
+      console.log("Finished remove filterCircle");
     });
 
     $('#turf-buffer').on('click', function() {
@@ -424,7 +434,7 @@
         };
         // // console.log(buffered);
         var results = turf.featurecollection(buffered);
-        // console.log(results);
+        console.log(results);
         // var bufferLayer = L.mapbox.featureLayer().addTo(map);
         // bufferLayer.setGeoJSON(results);
         // var bufferLayer = L.geoJson().addTo(map);
@@ -495,7 +505,7 @@
             document.getElementById('coordinates').innerHTML += listContent;
         }
         
-        // when mouseover, dim the background and show corresponding marker
+        // when mouseover info sidebar, dim the info box background and show corresponding marker
         $("#coordinates div").hover(
         function(){ // mouseenter
           $(this).addClass("hover");
@@ -523,7 +533,7 @@
         var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
-            closeButton: false,
+            closeButton: true,
             minWidth: 120
             });
     });
@@ -536,7 +546,7 @@
         var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
-            closeButton: false,
+            closeButton: true,
             minWidth: 120
             });
     });
@@ -546,6 +556,11 @@
     eventLayer.on('mouseover', function(e) {
         e.layer.openPopup();
     });
+
+    hiddengemLayer.on('mouseover', function(e) {
+        e.layer.openPopup();
+    });
+
 
 
     // Toggling layers by event category
@@ -611,31 +626,33 @@
     
     var routeLayer = L.geoJson().addTo(map);
     
-    // helper function to show route
+    // helper function to show route and details
     function showRoute(results) {
-      // var polyline = L.polyline(results, {color:"#ff7800", "weight": 5, "opacity": 0.65 }).addTo(map);
-      // map.fitBounds(polyline, getBounds());
-
-      // if (map.hasLayer(routeLayer)) {
-      //   map.removeLayer(routeLayer);
-      //   console.log("Finished clear map");
-      // } else {
-      //   var routeLayer = L.geoJson().addTo(map);
-
+        // get LineString geojson
         var myLines = results.geometry;
-        // var routeLayer = L.geoJson().addTo(map); 
+        // add LineString to routeLayer
         routeLayer.addData(myLines);
+        // style route
         routeLayer.setStyle({
           "color": "#ff7800",
           "weight": 5,
           "opacity": 0.65 });
+        // console.log for debugging
         console.log("Finished add routeLayer");
-        // fit view to route
+        // zoom to route
         map.fitBounds(routeLayer.getBounds());
+        // get distance (in meters) from api response
+        var distance = (results.distance / 1609.34).toFixed(2);
+        document.getElementById('distance').innerHTML = (distance + " miles");
+        // get duration (in seconds) from api response
+        var duration = Math.round(results.duration / 60);
+        document.getElementById('duration').innerHTML = (duration + " mins");
+        // console.log for debugging
+        console.log("Finished show route");
       }
-    //   console.log("Finished show route");
-    // };
 
+
+    // experiment.
     function addPath(results) {
       // console.log(results);
       var line_points = results.geometry;
@@ -652,6 +669,7 @@
         // className: "path"
       };
       var polyline = L.polyline(line_points, polyline_options).addTo(map);
+      console.log(polyline);
       console.log("Finished add path");
     };
 
@@ -678,10 +696,9 @@
     $('#get-route').on('click', function(e) {
       e.preventDefault();
       $.get('/get_route', showRoute);
-      // document.getElementById('get-route').className="hide";
-      // document.getElementById('re-route').className="show";
     });
 
+    // clear route from map
     $('#clear-route').on('click', function(e) {
       e.preventDefault();
       if (map.hasLayer(routeLayer)) {
@@ -690,33 +707,17 @@
       console.log("Finished remove routeLayer"); 
     });
 
+    // experiment.
     $('#add-path').on('click', function(e) {
       e.preventDefault();
       $.get('/get_route_polyline', addPath);
       console.log("Finished add path");
     });
 
+    // experiment.
     $('#remove-path').on('click', function(e) {
       e.preventDefault();
     });
-
-
-    // })
-
-      // $.get('/get_directions', {'profile'})
-      // $('nav').hide();
-      // $('#trip-panel').hide();
-      // // Directions
-      // var directions = L.mapbox.directions();
-      // var directionsLayer = L.mapbox.directions.layer(directions).addTo(map);
-      // var directionsInputControl = L.mapbox.directions.inputControl('inputs', directions).addTo(map);
-      // var directionsErrorsControl = L.mapbox.directions.errorsControl('errors', directions).addTo(map);
-      // var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions).addTo(map);
-      // var directionsInstructionsControl = L.mapbox.directions.instructionsControl('instructions', directions).addTo(map);
-      // document.getElementById('inputs').className = "show";
-      // document.getElementById('errors').className = "show";
-      // document.getElementById('directions').className = "show";    
-    // });
 
 
     // commit to database about saved trip and clear session and waypoints list
