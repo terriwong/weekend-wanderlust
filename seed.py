@@ -86,5 +86,5 @@ if __name__ == '__main__':
     connect_to_db(app)
     db.create_all()
 
-    load_events('data/markers-20160217.csv')
+    load_events('data/markers-20160224.csv')
     # load_hiddengems()

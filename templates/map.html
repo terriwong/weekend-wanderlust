@@ -162,7 +162,7 @@
 
     #trip-panel {
       position: absolute;
-      width: 25%;
+      width: 20%;
       background:rgba(0,0,0,0.5);
       color: white;
       right: 10px; bottom: 20px;
@@ -281,7 +281,7 @@
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
     // load base map, set initial position, add search controller.
-    var map = L.mapbox.map('map', 'mapbox.streets')
+    var map = L.mapbox.map('map', 'mapbox.emerald')
         .setView([37.75, -122.327], 12)
         .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
@@ -328,8 +328,8 @@
       });
     }
 
-    // var counter = 0;
 
+    // count hiddengems within raidus circle
     function countWithin(e) {
       var counter = 0;
       hiddengemLayer.eachLayer(function(marker) {
