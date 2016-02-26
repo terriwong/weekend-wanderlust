@@ -49,6 +49,8 @@
     background-color: #33cccc;
     margin-left: 4%;
     width:300px;
+    font-family: 'Nunito', sans-serif;  
+    font-weight: 300;
     }
 
     pre.ui-coordinates {
@@ -310,14 +312,14 @@
     }
 
     function closePanel() {
-      document.getElementById('trip-panel').style.display = "hidden";
+      document.getElementById('trip-panel').style.display = "none";
     }
 
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
     // load base map, set initial position, add search controller.
     var map = L.mapbox.map('map', 'mapbox.streets')
-        .setView([37.75, -122.327], 10)
+        .setView([37.71, -122.327], 10)
         .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
     var eventLayer = L.mapbox.featureLayer().addTo(map);

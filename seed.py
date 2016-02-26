@@ -11,7 +11,7 @@ from datetime import datetime
 def load_markers(file):
     """Load markers from dataset into Marker database."""
 
-    with open(file) as f:
+    with open(file) as csvfile:
         # next(f)  # skip header row
 
         # for i, row in enumerate(f):
@@ -20,13 +20,19 @@ def load_markers(file):
 
             # 0)title, 1)description, 2)date, 3)date-tier, 4)time, 5)name(venue), 6)neighborhood, 7)city, 8)address, 9)latitude, 10)longitude, 11)cost, 12)img_url, 13)event_url, 14)category, 15)marker_type, 16)marker_symbol, 17)marker_color = row.split("\t")
 
-        reader = csv.reader(f)
-        for i, row in enumerate(reader):
+        csvreader = csv.reader(csvfile)
+
+        # Skips the first row of the CSV file
+        next(csvreader)
+
+        for i, row in enumerate(csvreader):
 
             if row[2]:
                 date_str = str(row[2])
                 # import pdb; pdb.set_trace()
                 date_obj = datetime.strptime(date_str, "%B %d, %Y")
+            else:
+                pass
 
             marker = Marker(title=row[0],
                             address=row[8],
@@ -93,5 +99,5 @@ if __name__ == '__main__':
     connect_to_db(app)
     db.create_all()
 
-    load_markers('data/markers-20160225.csv')
+    load_markers('data/markers-20160226.csv')
     # load_hiddengems()
