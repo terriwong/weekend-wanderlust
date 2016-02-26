@@ -19,7 +19,8 @@ class Marker(db.Model):
     address = db.Column(db.String(255), nullable=False)
     latitude = db.Column(db.String(64), nullable=False)
     longitude = db.Column(db.String(64), nullable=False)
-    date = db.Column(db.String(64), nullable=True)  # shop has no date
+    date = db.Column(db.DateTime, nullable=True)  # shop has no date
+    date_tier = db.Column(db.String(20), nullable=True)  # hiddengem has not date_tier
     time = db.Column(db.String(64), nullable=True)
     neighborhood = db.Column(db.String(64), nullable=True)  # can be no neighborhood
     city = db.Column(db.String(64), nullable=True)

@@ -1,4 +1,4 @@
-"""Weekend Wanderlust - Interactive Map & Weekend Trip Planner."""
+"""Weekend Wanderlust - Hiddengems Map & Weekend Trip Planner for Bay Area explorers."""
 
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, jsonify, flash, redirect, request, session
@@ -6,6 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 import os
 import requests
 from polyline.codec import PolylineCodec
+from datetime import datetime
 
 from model import connect_to_db, Marker
 
@@ -45,6 +46,8 @@ def send_features():
 def events_json():
     """Geojson from database for event layer."""
 
+    today = datetime.now()
+
     e_geojson = {
                 "type": "FeatureCollection",
                 "features": [
@@ -53,6 +56,7 @@ def events_json():
                     "properties": {
                         "title": marker.title,
                         "date": marker.date,
+                        "date-tier": marker.date_tier,
                         "time": marker.time,
                         "name": marker.name,
                         "address": marker.address,
@@ -73,7 +77,7 @@ def events_json():
                     },
                     "id": marker.marker_id
                     }
-                for marker in Marker.query.filter(Marker.marker_type == 'event').all()
+                for marker in Marker.query.filter(Marker.marker_type == 'event', Marker.date > today).all()
                 ]
             }
 
@@ -149,7 +153,8 @@ def add_waypoint():
 
 @app.route('/update_waypoint_list')
 def update_waypoint_list():
-    """Get newly added waypoint id, return name from database."""
+    """Get newly added waypoint id, return name from database.
+    ******Fix*******"""
 
     print "current session:", session['waypoints']
     waypoint_list = session['waypoints']

@@ -28,13 +28,14 @@
 
     .label {
     position: absolute;     
-    width: 300px;
+    width: 315px;
     height: 22px;
-    left: 10px;
-    top: 20px;
+/*    left: 10px;
+*/    top: 20px;
     color: white; 
     text-align: center;
     padding-top: 8px;
+    margin-left: 5%;
     font-size: 14px;
     }
 
@@ -42,34 +43,28 @@
       display: none;
     }
 
-    #gems {
-/*    background-color: #7C5852;
-*/    background-color: #33cccc;
-      }
-
-    #start {
-    background-color: #33cccc;
-/*    display: none;
-*/    }
-
+    #gems,
+    #start,
     #explorer {
     background-color: #33cccc;
-/*    display: none;
-*/    }
+    margin-left: 4%;
+    width:300px;
+    }
 
     pre.ui-coordinates {
     background:rgba(0,0,0,0.5);
     position:absolute;
     bottom:10px;
-    left:10px;
-  /*  padding:5px 10px; */  
+/*    left:10px;
+*/  /*  padding:5px 10px; */  
     color:#fff;
     font-size:11px;
     line-height:18px;
 /*    border-radius:3px;
 */    max-height:90%;
-    overflow:auto;
+    overflow-y: auto;
     width:300px;
+    margin-left: 4%;
     }
 
 /*  .listCard {
@@ -87,7 +82,7 @@
   }
 
   #listImg {
-    width: 300px;
+    width: 100%;
     height: auto;
   }
 
@@ -97,7 +92,7 @@
   }
 
   #container img {
-    width: 300px;
+    width: 100%;
   }
 
   #container p {
@@ -130,7 +125,7 @@
   top:10px;right:10px;
   z-index:1;
   border-radius:3px;
-  width:20%;
+  width:15%;
   border:1px solid rgba(0,0,0,0.4);
   }
   .menu-ui a {
@@ -160,19 +155,23 @@
       color:#FFF;
       }
 
-    #trip-panel {
+    #trip-panel, .flip {
       position: absolute;
       width: 20%;
-      background:rgba(0,0,0,0.5);
+      background:rgba(0,0,0,0.8);
       color: white;
       right: 10px; bottom: 20px;
       overflow: auto;
       margin: 0;
-      padding: 5px;
+      padding: 2%;
       max-height: 80%;
       font-family: 'Nunito', sans-serif;  
       font-weight: 300;
       font-size: 12px;
+    }
+
+    #trip-panel {
+      display: none;
     }
 
     #waypoint-list {
@@ -218,58 +217,86 @@
           box-sizing:border-box;
     }
 
-/*    .map {
-      border-right: 1px solid #fff;
-      position: absolute;
-      right: 33.3333%;
-      width: 66.6666%;
-      top: 0;
-      bottom: 0;
+    #close {
+      float: right;
+      display: inline-block;
+      padding: 2px 5px;
+      color: white;
     }
-*/
+
+    .box {
+      padding: 5px;
+    }
+
+    #verticalbar {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      width: 3%;
+      background: rgba(0,0,0,.9);
+      height: 100%;
+      position: fixed;
+      overflow: auto;
+      z-index: 100;
+      visibility: hidden;
+    }
+    
     </style>
 </head>
 <body>
 
+<ul id="verticalbar">
+  <li><a href="#">Home</a></li>
+  <li><a href="#">Blog</a></li>
+  <li><a href="#">Contact</a></li>
+  <li><a href="#">About</a></li>
+</ul>
+
 <div class='sidebar pad2'>
 <nav id='menu-ui' class='menu-ui pad2'>
-    <a href='#' class='active' id='filter-all'>This Weekend Events - ALL</a>
-    <a href='#' id='filter-fairs'>Fairs & Festivals</a>
-    <a href='#' id='filter-arts'>Art & Museums</a>
+    <a href='#' class='active' id='filter-all'>All Weekend</a>
+    <a href='#' id='filter-friday'>Friday Night</a>
+    <a href='#' id='filter-saturday'>Saturday</a>
+    <a href='#' id='filter-sunday'>Sunday</a>
 </nav>
 </div>
-<div id='map' class='map pad2'></div>
+
+<div id='map'></div>
+
 <div class='label' id='start'><b>Click an event to uncover hiddengems</b></div>
-<div class='label hide' id='gems'><b>Hiddengems nearby</b></div>
-<div class='label hide' id='explorer'><b>Explorer mode</b></div>
+<div class='label hide' id='gems'><b>Mouseover info to locate hiddengem</b></div>
+<div class='label hide' id='explorer'><b>Hiddengems within 1-mile circle</b></div>
 
 
 <pre id='coordinates' class='ui-coordinates'></pre>
 
+<p class="flip" onclick="openPanel()">Click to open Trip Panel</p>
 <div id="trip-panel">
-<div>Trip Planner Panel</div><br> 
-<div><b>Selected waypoints:</b><ol id='waypoint-list'></ol></div>
-<b>Selected travel profile: </b><div id="selected-profile" class="inline"></div><br>
-<div>
-  <b>Distance: </b><div id="distance" class="inline"></div><br>
-  <b>Estimated time: </b><div id="duration" class="inline"></div><br>
-  <div>There are <div id="counter"></div> hiddengems within 1 mile.</div>
-</div>
-<br><div id='status'></div><br>
-<form action="/get_profile">
-  Way of traveling:<br>
-  <input type="radio" name="profile" value="walking">Walking
-  <input type="radio" name="profile" value="cycling">Cycling
-  <input type="radio" name="profile" value="driving">Driving<br>
-</form><br>
+  <span id="close" onclick="closePanel()">x</span>
+  <p>Trip Planner Panel</p><br> 
+  <div><b>Selected waypoints:</b>
+    <ol id='waypoint-list'></ol></div>
+  <b>Selected travel profile: </b><div id="selected-profile" class="inline"></div><br>
+  <div>
+    <b>Distance: </b><div id="distance" class="inline"></div><br>
+    <b>Estimated time: </b><div id="duration" class="inline"></div><br>
+    <div>There are <div id="counter"></div> hiddengems within 1 mile.</div>
+  </div>
+  <div id='status'></div><br>
+  <form action="/get_profile">
+    Way of traveling:<br>
+    <input type="radio" name="profile" value="walking">Walking
+    <input type="radio" name="profile" value="cycling">Cycling
+    <input type="radio" name="profile" value="driving">Driving<br>
+  </form><br>
 
-<button id="get-route">Show route</button>
-<button id="clear-route">Clear route</button>
-<button id="clear-session">Clear session</button><br>
+  <button id="get-route">Show route</button>
+  <button id="clear-route">Clear route</button>
+  <button id="clear-session">Clear session</button><br>
 
-<button id="show-circle">1 mile circle</button>
-<button id="remove-circle">remove circle</button>
-<button id="turf-buffer">Turf buffer</button>
+  <button id="show-circle">1 mile circle</button>
+  <button id="remove-circle">remove circle</button> 
+  <button id="turf-buffer">Turf buffer</button>
 </div> 
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.js'></script>
@@ -278,17 +305,26 @@
 <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
 
+    function openPanel() {
+      document.getElementById('trip-panel').style.display = "block";
+    }
+
+    function closePanel() {
+      document.getElementById('trip-panel').style.display = "hidden";
+    }
+
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
     // load base map, set initial position, add search controller.
-    var map = L.mapbox.map('map', 'mapbox.emerald')
-        .setView([37.75, -122.327], 12)
+    var map = L.mapbox.map('map', 'mapbox.streets')
+        .setView([37.75, -122.327], 10)
         .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
     var eventLayer = L.mapbox.featureLayer().addTo(map);
     eventLayer.loadURL('/events.geojson');
 
-    var hiddengemLayer = L.mapbox.featureLayer().addTo(map);
+    // create hiddengemLayer, load geojson, but not add to map just yet.
+    var hiddengemLayer = L.mapbox.featureLayer().loadURL('/hiddengems.geojson');
     // hiddengemLayer.loadURL('/features-20160210.geojson');
 
     // // 1 mile(1610m) radius circle for showWithin
@@ -305,7 +341,7 @@
     eventLayer.on('click', function(e) {
         map.panTo(e.latlng);
         map.setView(e.latlng, 14);
-        hiddengemLayer.loadURL('/hiddengems.geojson');
+        hiddengemLayer.addTo(map);
         document.getElementById('gems').className = "label show";
       });
 
@@ -342,11 +378,12 @@
     }
 
     // show 1 mile radius circle on mousemove or mouseclick
+    // flag "if var has_circl", flip the function
     $('#show-circle').on('click', function() {
       map.on('mousemove', function(e) {
       countWithin(e);
       filterCircle.setLatLng(e.latlng);
-      hiddengemLayer.loadURL('/hiddengems.geojson');
+      hiddengemLayer.addTo(map);
       hiddengemLayer.setFilter(function showWithin(feature) {
         return e.latlng.distanceTo(L.latLng(
           feature.geometry.coordinates[1],
@@ -356,7 +393,7 @@
         countWithin(e);
         map.off("mousemove");
         filterCircle.setLatLng(e.latlng);
-        hiddengemLayer.loadURL('/hiddengems.geojson');
+        hiddengemLayer.addTo(map);
         hiddengemLayer.setFilter(function showWithin(feature) {
         return e.latlng.distanceTo(L.latLng(
           feature.geometry.coordinates[1],
@@ -372,6 +409,10 @@
     $('#remove-circle').on('click', function() {
       filterCircle.setLatLng([0,0]);
       map.off("mousemove");
+      map.off("click");
+      hiddengemLayer.setFilter(function showWithin(feature) {
+        return true;
+      });
       console.log("Finished remove filterCircle");
     });
 
@@ -530,7 +571,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
+        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
@@ -543,7 +584,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
@@ -565,32 +606,47 @@
 
     // Toggling layers by event category
     var all = document.getElementById('filter-all');
-    var fairs = document.getElementById('filter-fairs');
-    var arts = document.getElementById('filter-arts');
+    var friday = document.getElementById('filter-friday');
+    var saturday = document.getElementById('filter-saturday');
+    var sunday = document.getElementById('filter-sunday');
 
-    fairs.onclick = function(e) {
+    friday.onclick = function(e) {
         all.className = '';
-        arts.className = '';
+        saturday.className = '';
+        sunday.className = '';
         this.className = 'active';
         eventLayer.setFilter(function(f) {
-            return f.properties['category'] === 'Fairs & Festivals';
+            return f.properties['date-tier'] === 'Friday Night';
         });
         return false;
     };
 
-    arts.onclick = function(e) {
+    saturday.onclick = function(e) {
         all.className = '';
-        fairs.className = '';
+        friday.className = '';
+        sunday.className = '';
         this.className = 'active';
         eventLayer.setFilter(function(f) {
-            return f.properties['category'] === 'Art & Museums';
+            return f.properties['date-tier'] === 'Saturday';
+        });
+        return false;
+    };
+
+    sunday.onclick = function(e) {
+        all.className = '';
+        friday.className = '';
+        saturday.className = '';
+        this.className = 'active';
+        eventLayer.setFilter(function(f) {
+            return f.properties['date-tier'] === 'Sunday';
         });
         return false;
     };
 
     all.onclick = function() {
-        fairs.className = '';
-        arts.className = '';
+        friday.className = '';
+        saturday.className = '';
+        sunday.className = '';
         this.className = 'active';
         eventLayer.setFilter(function(f) {
             return true;
@@ -730,6 +786,11 @@
       $.get('/start_over', showStatus);
       console.log("Finished show status");
     });
+
+    // css position change
+    // things within container width 100%
+    // load geojson first, add to map later
+    // Interview cake
 
 </script>    
 </body>
