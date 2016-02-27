@@ -31,7 +31,7 @@
     width: 315px;
     height: 22px;
 /*    left: 10px;
-*/    top: 20px;
+*/    top: 21px;
     color: white; 
     text-align: center;
     padding-top: 8px;
@@ -53,32 +53,157 @@
     font-weight: 300;
     }
 
-    pre.ui-coordinates {
+    body .ui {
+    width:300px;
     background:rgba(0,0,0,0.5);
+    font-family: 'Nunito', sans-serif;
     position:absolute;
-    bottom:10px;
+    bottom:20px;
 /*    left:10px;
 */  /*  padding:5px 10px; */  
     color:#fff;
     font-size:11px;
     line-height:18px;
-/*    border-radius:3px;
-*/    max-height:90%;
-    overflow-y: auto;
-    width:300px;
+/*    border-radius:3px;*/    
+    max-height:90%;
+    overflow: auto;
     margin-left: 4%;
+    box-shadow: none;
+    z-index: 0;
+    }
+
+/*    body .ui div {
+      padding: 0;
+      margin: 0;
+    }
+*/
+    body .ui .drop {
+      z-index: -3;
+      opacity: 0;
+      width: 240px;
+      height: 10px;
+      background-color: #3d3d3d;
+      position: absolute;
+      color: white;
+      bottom: 0;
+      padding: 12px 30px 21px 30px;
+      -webkit-transition-property: bottom, opacity;
+      transition-property: bottom, opacity;
+      -webkit-transition-duration: .3s;
+      transition-duration: .3s;
+    }
+
+    body .ui_box .drop p {
+      color: white;
+    }
+
+    body .ui_box {
+      top: -6px;
+      bottom: 0;
+      z-index: 1;
+      width: 300px;
+      height: auto;
+/*      margin-left: 4%;
+*/      position: relative;
+      background: rgba(0,0,0,0.5);
+      float: left; 
+      box-shadow: -1px 0px rgba(255, 255, 255, 0.07);
+      cursor: pointer;
+      -webkit-transform: scale(1);
+      transform: scale(1);
+      -webkit-transition-property: background,-webkit-transform;
+      transition-property: transform, background;
+      transition-property: transform, background, -webkit-transform;
+      -webkit-transition-duration: .3s;
+      transition-duration: .3s;    
+    }
+
+    body .ui_box__inner {
+      padding: 25px;
+    }
+
+    body .ui_box__inner p {
+      padding: 5px;
+      margin: 10px;
+    }
+
+    body .ui_box p {
+      font-size: 11px;
+      color: #b6b6b6;
+      clear: left;
+      font-weight: 300;
+      width: 220px;
+      margin: 0px 0px 0px 0px;
+    }
+
+    body .ui_box:hover {
+      background: #3d3d3d;
+/*      background: rgba(255, 255, 255, 0.07);
+*/      -webkit-transform: scale(1.05);
+      transform: scale(1.05);
+      -webkit-transition-property: background, -webkit-transform;
+      transition-property: background, -webkit-transform;
+      transition-property: transform, background;
+      transition-property: transform, background, -webkit-transform;
+      -webkit-transition-duration: .3s;
+      transition-duration: .3s;
+      position: relative;
+      z-index: 20;
+    }
+
+    .ui_box:hover > .ui_box__inner p {
+      color: white;
+    }
+
+    .ui_box:hover > .drop {
+      -webkit-transition-property: bottom, opacity;
+      transition-property: bottom, opacity;
+      -webkit-transition-duration: .3s;
+      transition-duration: .3s;
+      bottom: -42px;
+      opacity: 1;
+      background-color: #33cccc;
+    }
+
+    .ui_box:hover > .drop .arrow {
+      -webkit-transition-property: -webkit-transform;
+      transition-property: -webkit-transform;
+      transition-property: transform;
+      transition-property: transform, -webkit-transform;
+      -webkit-transition-duration: 1s;
+      transition-duration: 1s;
+      -webkit-transform: rotate(765deg);
+      transform: rotate(765deg);
+    }
+
+    .arrow {
+      width: 4px;
+      height: 4px;
+      -webkit-transition-property: -webkit-transform;
+      transition-property: -webkit-transform;
+      transition-property: transform;
+      transition-property: transform, -webkit-transform;
+      -webkit-transition-duration: 1s;
+      transition-duration: 1s;
+      -webkit-transform: rotate(45deg);
+      transform: rotate(45deg);
+      -webkit-transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      border-top: 1px solid #CDEAD3;
+      border-right: 1px solid #CDEAD3;
+      float: right;
+      position: relative;
+      top: -11px;
+      right: 0px;
     }
 
 /*  .listCard {
-    background-color: transparent;
-    width: 100%;
-    height: auto;
-    }*/
-
-  .hover {
+    margin-top: -2px;
+    }
+*/
+/*  .hover {
     background: rgba(0,0,0,0.3);
   }
-
+*/
   #popupimg {
     width: 100%;
   }
@@ -86,6 +211,7 @@
   #listImg {
     width: 100%;
     height: auto;
+    margin-top: -6px;
   }
 
   #container {
@@ -95,6 +221,7 @@
 
   #container img {
     width: 100%;
+    height: auto;
   }
 
   #container p {
@@ -242,6 +369,8 @@
       z-index: 100;
       visibility: hidden;
     }
+
+
     
     </style>
 </head>
@@ -269,8 +398,7 @@
 <div class='label hide' id='gems'><b>Mouseover info to locate hiddengem</b></div>
 <div class='label hide' id='explorer'><b>Hiddengems within 1-mile circle</b></div>
 
-
-<pre id='coordinates' class='ui-coordinates'></pre>
+<div id='coordinates' class='ui'></div>
 
 <p class="flip" onclick="openPanel()">Click to open Trip Panel</p>
 <div id="trip-panel">
@@ -542,16 +670,18 @@
       var bounds = map.getBounds();
 
       hiddengemLayer.eachLayer(function(marker) {
+
+        // check if marker is in view, if yes, construct contents to show in preview box
         if (bounds.contains(marker.getLatLng())) {
-          var listContent = '<div id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '"><img id="listImg" src="' + marker.feature.properties.img_url + '" />' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '<br></p><br></div>';
+          var listContent = '<div><img id="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
             
-            document.getElementById('coordinates').innerHTML += listContent;
+          document.getElementById('coordinates').innerHTML += listContent;
         }
         
-        // when mouseover info sidebar, dim the info box background and show corresponding marker
+        // when mouseover preview box, dim the info box background and show corresponding marker
         $("#coordinates div").hover(
         function(){ // mouseenter
-          $(this).addClass("hover");
+          // $(this).addClass("hover");
           var target = this.dataset.id;
           // console.log(target);
           hiddengemLayer.eachLayer(function(marker){
