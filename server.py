@@ -1,12 +1,12 @@
 """Weekend Wanderlust - Hiddengems Map & Weekend Trip Planner for Bay Area explorers."""
 
 from jinja2 import StrictUndefined
-from flask import Flask, render_template, jsonify, flash, redirect, request, session
+from flask import Flask, render_template, jsonify, request, session
 from flask_debugtoolbar import DebugToolbarExtension
 import os
 import requests
 from polyline.codec import PolylineCodec
-from datetime import datetime
+from datetime import date
 
 from model import connect_to_db, Marker
 
@@ -46,7 +46,7 @@ def send_features():
 def events_json():
     """Geojson from database for event layer."""
 
-    today = datetime.now()
+    today = date.today()
 
     e_geojson = {
                 "type": "FeatureCollection",
@@ -77,7 +77,7 @@ def events_json():
                     },
                     "id": marker.marker_id
                     }
-                for marker in Marker.query.filter(Marker.marker_type == 'event', Marker.date > today).all()
+                for marker in Marker.query.filter(Marker.marker_type == 'event', Marker.datetime >= today).all()
                 ]
             }
 

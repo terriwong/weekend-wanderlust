@@ -22,23 +22,22 @@ def load_markers(file):
 
         csvreader = csv.reader(csvfile)
 
-        # Skips the first row of the CSV file
+        # Skips the first header row of the CSV file
         next(csvreader)
 
         for i, row in enumerate(csvreader):
 
             if row[2]:
                 date_str = str(row[2])
-                # import pdb; pdb.set_trace()
-                date_obj = datetime.strptime(date_str, "%B %d, %Y")
+                datetime_obj = datetime.strptime(date_str, "%B %d, %Y")
             else:
-                pass
+                datetime_obj = None
 
             marker = Marker(title=row[0],
                             address=row[8],
                             latitude=row[9],
                             longitude=row[10],
-                            date=date_obj,
+                            date=row[2],
                             date_tier=row[3],
                             time=row[4],
                             name=row[5],
@@ -51,7 +50,8 @@ def load_markers(file):
                             category=row[14],
                             marker_type=row[15],
                             marker_symbol=row[16],
-                            marker_color=row[17])
+                            marker_color=row[17],
+                            datetime=datetime_obj)
 
             db.session.add(marker)
 
