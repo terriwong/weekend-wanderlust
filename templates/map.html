@@ -9,6 +9,7 @@
     <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
 
 
+
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
@@ -370,6 +371,25 @@
       visibility: hidden;
     }
 
+    #popupButton {
+      background-color: white;
+      border: 2px solid #33cccc;
+      color: #33cccc;
+      padding: 8px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      margin-top: 8px;
+      margin-bottom: 2px;
+      cursor: pointer;
+    }
+
+    #popupButton:hover {
+      background-color: #33cccc;
+      color: white;
+      border: 2px solid #33cccc;
+    }
 
     
     </style>
@@ -398,7 +418,8 @@
 <div class='label hide' id='gems'><b>Mouseover info to locate hiddengem</b></div>
 <div class='label hide' id='explorer'><b>Hiddengems within 1-mile circle</b></div>
 
-<div id='coordinates' class='ui'></div>
+<!-- Info box with scroll spy -->
+<div id='coordinates' class='ui' data-spy="scroll" data-target="#myScrollspy" data-offset="20"></div>
 
 <p class="flip" onclick="openPanel()">Click to open Trip Panel</p>
 <div id="trip-panel">
@@ -441,6 +462,10 @@
 
     function closePanel() {
       document.getElementById('trip-panel').style.display = "none";
+    }
+
+    function openMoreInfoPanel() {
+      pass
     }
 
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
@@ -673,7 +698,7 @@
 
         // check if marker is in view, if yes, construct contents to show in preview box
         if (bounds.contains(marker.getLatLng())) {
-          var listContent = '<div><img id="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
+          var listContent = '<div><img id="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" onclick="openMoreInfoPanel()"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
             
           document.getElementById('coordinates').innerHTML += listContent;
         }
@@ -703,7 +728,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
+        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
@@ -716,7 +741,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
