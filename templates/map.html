@@ -415,7 +415,7 @@
 <div id='map'></div>
 
 <div class='label' id='start'><b>Click an event to uncover hiddengems</b></div>
-<div class='label hide' id='gems'><b>Mouseover info to locate hiddengem</b></div>
+<div class='label hide' id='gems'><b><span id="counter"></span></b> hiddengems within 1 mile</div>
 <div class='label hide' id='explorer'><b>Hiddengems within 1-mile circle</b></div>
 
 <!-- Info box with scroll spy -->
@@ -464,10 +464,12 @@
       document.getElementById('trip-panel').style.display = "none";
     }
 
+    // open panel to show more info from Yell/Foursquare api
     function openMoreInfoPanel() {
-      pass
+      // to be developed
     }
 
+    // load mapbox public access token.
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
 
     // load base map, set initial position, add search controller.
@@ -475,32 +477,25 @@
         .setView([37.71, -122.327], 10)
         .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
+    // add event layer to map and load event markers geojson.
     var eventLayer = L.mapbox.featureLayer().addTo(map);
     eventLayer.loadURL('/events.geojson');
 
     // create hiddengemLayer, load geojson, but not add to map just yet.
     var hiddengemLayer = L.mapbox.featureLayer().loadURL('/hiddengems.geojson');
-    // hiddengemLayer.loadURL('/features-20160210.geojson');
 
-    // // 1 mile(1610m) radius circle for showWithin
-    // var RADIUS = 1610;
-    // var filterCircle_options = {
-    //       color: "#33cccc",
-    //       opacity: 1,
-    //       weight: 1.5,
-    //       fillOpacity: 0.1
-    //     };
-    // var filterCircle = L.circle([0,0], RADIUS, filterCircle_options).addTo(map);
-
-    // on click, zoom in and show nearby hiddengems
+    // when click on any event marker, zoom in and show nearby hiddengems
     eventLayer.on('click', function(e) {
         map.panTo(e.latlng);
-        map.setView(e.latlng, 14);
+        map.setView(e.latlng, 13);
         hiddengemLayer.addTo(map);
+        showWithin(e);
+        countWithin(e);
+        showInView();
         document.getElementById('gems').className = "label show";
       });
 
-    // 1 mile radius circle for showWithin
+    // define the 1 mile radius circle for showWithin
     var RADIUS = 1610;
     var filterCircle_options = {
           color: "#33cccc",
@@ -510,17 +505,19 @@
         };
     var filterCircle = L.circle([0,0], RADIUS, filterCircle_options).addTo(map);
 
-    function addDraggableMarker(e) {
-      var marker = L.marker(new L.LatLng(e.latlng), {
-        icon: L.mapbox.marker.icon({
-          'marker-color': 'ff8888'
-        }),
-        draggable: true
-      });
-    }
+
+    // intend to add draggable marker to circle center, under development
+    // function addDraggableMarker(e) {
+    //   var marker = L.marker(new L.LatLng(e.latlng), {
+    //     icon: L.mapbox.marker.icon({
+    //       'marker-color': 'ff8888'
+    //     }),
+    //     draggable: true
+    //   });
+    // }
 
 
-    // count hiddengems within raidus circle
+    // function to count hiddengems within radius circle
     function countWithin(e) {
       var counter = 0;
       hiddengemLayer.eachLayer(function(marker) {
@@ -532,32 +529,28 @@
       document.getElementById('counter').innerHTML = counter;
     }
 
-    // show 1 mile radius circle on mousemove or mouseclick
-    // flag "if var has_circl", flip the function
-    $('#show-circle').on('click', function() {
-      map.on('mousemove', function(e) {
-      countWithin(e);
+    // function to show hiddengems within radius circle
+    function showWithin(e) {
       filterCircle.setLatLng(e.latlng);
       hiddengemLayer.addTo(map);
-      hiddengemLayer.setFilter(function showWithin(feature) {
+      hiddengemLayer.setFilter(function showGems(feature) {
         return e.latlng.distanceTo(L.latLng(
           feature.geometry.coordinates[1],
           feature.geometry.coordinates[0])) < RADIUS;
-        });
-      map.on('click', function(e) {
-        countWithin(e);
-        map.off("mousemove");
-        filterCircle.setLatLng(e.latlng);
-        hiddengemLayer.addTo(map);
-        hiddengemLayer.setFilter(function showWithin(feature) {
-        return e.latlng.distanceTo(L.latLng(
-          feature.geometry.coordinates[1],
-          feature.geometry.coordinates[0])) < RADIUS;
-          });
-        });
-      // countWithin(e);
       });
-      document.getElementById('explorer').className = "label show";
+    }
+
+    //  Explorer mode: 1 mile radius circle on mousemove
+    $('#show-circle').on('click', function() {
+      map.on('mousemove', function(e) {
+        showWithin(e);
+        countWithin(e);
+      });
+      map.on('click', function(e) {
+        showWithin(e);
+        countWithin(e);
+      });
+      document.getElementById('gems').className = "label show";
     });
 
     // remove mousemove and reset filterCircle
@@ -688,9 +681,9 @@
     //     };
     //     bufferLayer.setGeoJSON(buffer);
     // }); 
+ 
 
-
-    map.on('move', function() {
+    function showInView() {
       $('#coordinates').empty();
       var bounds = map.getBounds();
 
@@ -720,15 +713,16 @@
           $(this).removeClass("hover");
         }); 
       });
-    });
+    }
 
+    map.on('click', showInView);
 
     // customize hiddengem popup content
     hiddengemLayer.on('layeradd', function(e) {
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
+        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip Panel</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
@@ -741,7 +735,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip</button></form>'; 
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip Panel</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
