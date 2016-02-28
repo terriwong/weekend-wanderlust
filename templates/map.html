@@ -8,8 +8,6 @@
     <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
     <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
 
-
-
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
@@ -73,11 +71,6 @@
     z-index: 0;
     }
 
-/*    body .ui div {
-      padding: 0;
-      margin: 0;
-    }
-*/
     body .ui .drop {
       z-index: -3;
       opacity: 0;
@@ -209,7 +202,7 @@
     width: 100%;
   }
 
-  #listImg {
+  .listImg {
     width: 100%;
     height: auto;
     margin-top: -6px;
@@ -414,9 +407,9 @@
 
 <div id='map'></div>
 
-<div class='label' id='start'><b>Click an event to uncover hiddengems</b></div>
+<div class='label' id='start'>Click an event to uncover hiddengems</div>
 <div class='label hide' id='gems'><b><span id="counter"></span></b> hiddengems within 1 mile</div>
-<div class='label hide' id='explorer'><b>Hiddengems within 1-mile circle</b></div>
+<div class='label hide' id='explorer'><b>Explorer circle</b></div>
 
 <!-- Info box with scroll spy -->
 <div id='coordinates' class='ui' data-spy="scroll" data-target="#myScrollspy" data-offset="20"></div>
@@ -431,7 +424,6 @@
   <div>
     <b>Distance: </b><div id="distance" class="inline"></div><br>
     <b>Estimated time: </b><div id="duration" class="inline"></div><br>
-    <div>There are <div id="counter"></div> hiddengems within 1 mile.</div>
   </div>
   <div id='status'></div><br>
   <form action="/get_profile">
@@ -447,13 +439,11 @@
 
   <button id="show-circle">1 mile circle</button>
   <button id="remove-circle">remove circle</button> 
-  <button id="turf-buffer">Turf buffer</button>
+  <button id="save-trip">Save trip</button>
 </div> 
 
-<script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.js'></script>
-<script src='https://api.mapbox.com/mapbox.js/plugins/mapbox-directions.js/v0.4.0/mapbox.directions.js'></script>
-<link rel='stylesheet' href='/static/directions.css' type='text/css' />
 <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="//cdn.jsdelivr.net/jquery.scrollto/2.1.2/jquery.scrollTo.min.js"></script>
 <script>
 
     function openPanel() {
@@ -486,14 +476,31 @@
 
     // when click on any event marker, zoom in and show nearby hiddengems
     eventLayer.on('click', function(e) {
-        map.panTo(e.latlng);
         map.setView(e.latlng, 13);
+        map.panTo(e.latlng);
         hiddengemLayer.addTo(map);
         showWithin(e);
         countWithin(e);
         showInView();
         document.getElementById('gems').className = "label show";
       });
+
+    // when click on hiddengem marker, zoom in, center and show info.
+    hiddengemLayer.on('click', function(e) {
+      map.setView(e.latlng, 14);
+      map.panTo(e.latlng);
+      showInView();
+      var id = e.layer.feature.id;
+      console.log(id);
+      $('#coordinates').scrollTo('#'+ id, {duration: 'slow'});
+    });
+
+    // hiddengemLayer.on('click', function(e) {
+    //   showInView();
+    //   var id = e.layer.feature.id
+    //   $('#coordinates').scrollTo('#'+ id);
+    // });
+
 
     // define the 1 mile radius circle for showWithin
     var RADIUS = 1610;
@@ -540,6 +547,13 @@
       });
     }
 
+    // given an address and showWithin
+    map.on('click', function() {
+      showWithin();
+      countWithin();
+    });
+
+
     //  Explorer mode: 1 mile radius circle on mousemove
     $('#show-circle').on('click', function() {
       map.on('mousemove', function(e) {
@@ -550,7 +564,9 @@
         showWithin(e);
         countWithin(e);
       });
-      document.getElementById('gems').className = "label show";
+      document.getElementById('explorer').className = "label show";
+      document.getElementById('gems').className = "label hide";
+
     });
 
     // remove mousemove and reset filterCircle
@@ -564,123 +580,124 @@
       console.log("Finished remove filterCircle");
     });
 
-    $('#turf-buffer').on('click', function() {
-      map.on('click', function(e) {
-        // var t = e.latlng;
-        // // console.log(t);
-        // var lat = t.lat;
-        // var lng = t.lng;
-        var pt = turf.point([37.748457761603355, -122.4326705932617], {
-            "description": "explorer",
-            "marker-color": "#6BC65F",
-            "marker-size": "large",
-            "marker-symbol": "pitch"
-          });
-        var ptLayer = L.mapbox.featureLayer().addTo(map);
-        ptLayer.setGeoJSON(pt);
-        console.log(pt);
+    // experiment no success, used another approach to achieve goal, try later.
+    // $('#turf-buffer').on('click', function() {
+    //   map.on('click', function(e) {
+    //     // var t = e.latlng;
+    //     // // console.log(t);
+    //     // var lat = t.lat;
+    //     // var lng = t.lng;
+    //     var pt = turf.point([37.748457761603355, -122.4326705932617], {
+    //         "description": "explorer",
+    //         "marker-color": "#6BC65F",
+    //         "marker-size": "large",
+    //         "marker-symbol": "pitch"
+    //       });
+    //     var ptLayer = L.mapbox.featureLayer().addTo(map);
+    //     ptLayer.setGeoJSON(pt);
+    //     console.log(pt);
 
         
-        var bufferLayer = L.mapbox.featureLayer().addTo(map);
+    //     var bufferLayer = L.mapbox.featureLayer().addTo(map);
 
-        ptLayer.eachLayer(function(layer) {
-          layer.options.draggable = true;
-          layer.on('drag', function(e) {
-            calculateBuffer();
-          });
-        });
+    //     ptLayer.eachLayer(function(layer) {
+    //       layer.options.draggable = true;
+    //       layer.on('drag', function(e) {
+    //         calculateBuffer();
+    //       });
+    //     });
 
-        function calculateBuffer() {
-          var pt = turf.featurecollection(ptLayer.getLayers().map(function(f) {
-            return f.toGeoJSON()
-          }));
-          // console.log(pt);
-          var buffer = turf.buffer(pt, 1, 'miles');
-          beffer.properties = {
-            "fill": "#6BC65F",
-            "stroke": "#25561F",
-            "stroke-width": 2
-          };
-          befferLayer.setGeoJSON(buffer);
-        }
-        // var pt = {
-        //   "type": "Feature",
-        //   "properties": {
-        //     "marker-color": "#6BC65F",
-        //     "marker-size": "small"
-        //   },
-        //   "geometry": {
-        //     "type": "Point",
-        //     "coordinates": [lat, lng]
-        //     }
-        //   };
-        // console.log(pt);
-        var buffered = turf.buffer(pt, 100, 'miles');
-        buffered.properties = {
-          "fill": "#6BC65F",
-          "stroke": "#25561F",
-          "stroke-width": 2
-        };
-        // // console.log(buffered);
-        var results = turf.featurecollection(buffered);
-        console.log(results);
-        // var bufferLayer = L.mapbox.featureLayer().addTo(map);
-        // bufferLayer.setGeoJSON(results);
-        // var bufferLayer = L.geoJson().addTo(map);
-        // bufferLayer.addData(results);
-        // bufferLayer.setStyle({
-        //   "color": "#ff7800",
-        //   "weight": 5,
-        //   "opacity": 0.65 });
-        
-        
-        // ptLayer.eachLayer(function(layer) {
-        //   layer.options.draggable = true;
-        //   layer.on('drag', function(e) {
-        //     calculateBuffer();
-          });
-        });
-
-        // ptLayer.addTo(map);
-        // calculateBuffer();
-
-      //   function calculateBuffer() {
-      //     var pt = turf.featurecollection(ptLayer.getLayers().map(function(f) {
-      //       return f.toGeoJSON()
-      //     }));
-      //   var buffer = turf.buffer(pt, 1, 'miles');
-      //   buffer.properties = {
-      //     "fill": "#6BC65F",
-      //     "stroke": "#25561F",
-      //     "stroke-width": 2
-      //   };
-      //   bufferLayer.setGeoJSON(buffer);
-      //   }
-      //   });
-      // });
-    
-        // hiddengemLayer.setFilter(function showWithin(f) {
-        //   return (e.layer.getLatLng()).distanceTo(
-        //     f.geometry.coordinates[1],
-        //     f.geometry.coordinates[0]) < RADIUS;
-        // });
-        // $.get('/hiddengems.geojson', showWithin);
-    //     var pt = {
-    //       "type": "Feature",
-    //       "properties": {},
-    //       "geometry": {
-    //         "type": "Point",
-    //         "coordinates": currentLatLng
-    //       }
-    //     };
-    //     var buffer = turf.butter(pt, 1, 'miles');
-    //     buffer.properties = {
+    //     function calculateBuffer() {
+    //       var pt = turf.featurecollection(ptLayer.getLayers().map(function(f) {
+    //         return f.toGeoJSON()
+    //       }));
+    //       // console.log(pt);
+    //       var buffer = turf.buffer(pt, 1, 'miles');
+    //       beffer.properties = {
+    //         "fill": "#6BC65F",
+    //         "stroke": "#25561F",
+    //         "stroke-width": 2
+    //       };
+    //       befferLayer.setGeoJSON(buffer);
+    //     }
+    //     // var pt = {
+    //     //   "type": "Feature",
+    //     //   "properties": {
+    //     //     "marker-color": "#6BC65F",
+    //     //     "marker-size": "small"
+    //     //   },
+    //     //   "geometry": {
+    //     //     "type": "Point",
+    //     //     "coordinates": [lat, lng]
+    //     //     }
+    //     //   };
+    //     // console.log(pt);
+    //     var buffered = turf.buffer(pt, 100, 'miles');
+    //     buffered.properties = {
     //       "fill": "#6BC65F",
     //       "stroke": "#25561F",
     //       "stroke-width": 2
     //     };
-    //     bufferLayer.setGeoJSON(buffer);
-    // }); 
+    //     // // console.log(buffered);
+    //     var results = turf.featurecollection(buffered);
+    //     console.log(results);
+    //     // var bufferLayer = L.mapbox.featureLayer().addTo(map);
+    //     // bufferLayer.setGeoJSON(results);
+    //     // var bufferLayer = L.geoJson().addTo(map);
+    //     // bufferLayer.addData(results);
+    //     // bufferLayer.setStyle({
+    //     //   "color": "#ff7800",
+    //     //   "weight": 5,
+    //     //   "opacity": 0.65 });
+        
+        
+    //     // ptLayer.eachLayer(function(layer) {
+    //     //   layer.options.draggable = true;
+    //     //   layer.on('drag', function(e) {
+    //     //     calculateBuffer();
+    //       });
+    //     });
+
+    //     // ptLayer.addTo(map);
+    //     // calculateBuffer();
+
+    //   //   function calculateBuffer() {
+    //   //     var pt = turf.featurecollection(ptLayer.getLayers().map(function(f) {
+    //   //       return f.toGeoJSON()
+    //   //     }));
+    //   //   var buffer = turf.buffer(pt, 1, 'miles');
+    //   //   buffer.properties = {
+    //   //     "fill": "#6BC65F",
+    //   //     "stroke": "#25561F",
+    //   //     "stroke-width": 2
+    //   //   };
+    //   //   bufferLayer.setGeoJSON(buffer);
+    //   //   }
+    //   //   });
+    //   // });
+    
+    //     // hiddengemLayer.setFilter(function showWithin(f) {
+    //     //   return (e.layer.getLatLng()).distanceTo(
+    //     //     f.geometry.coordinates[1],
+    //     //     f.geometry.coordinates[0]) < RADIUS;
+    //     // });
+    //     // $.get('/hiddengems.geojson', showWithin);
+    // //     var pt = {
+    // //       "type": "Feature",
+    // //       "properties": {},
+    // //       "geometry": {
+    // //         "type": "Point",
+    // //         "coordinates": currentLatLng
+    // //       }
+    // //     };
+    // //     var buffer = turf.butter(pt, 1, 'miles');
+    // //     buffer.properties = {
+    // //       "fill": "#6BC65F",
+    // //       "stroke": "#25561F",
+    // //       "stroke-width": 2
+    // //     };
+    // //     bufferLayer.setGeoJSON(buffer);
+    // // }); 
  
 
     function showInView() {
@@ -691,7 +708,7 @@
 
         // check if marker is in view, if yes, construct contents to show in preview box
         if (bounds.contains(marker.getLatLng())) {
-          var listContent = '<div><img id="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" onclick="openMoreInfoPanel()"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
+          var listContent = '<div><img id="' + marker.feature.id + '"class="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" onclick="openMoreInfoPanel()"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
             
           document.getElementById('coordinates').innerHTML += listContent;
         }
@@ -715,7 +732,6 @@
       });
     }
 
-    map.on('click', showInView);
 
     // customize hiddengem popup content
     hiddengemLayer.on('layeradd', function(e) {
@@ -753,6 +769,11 @@
         e.layer.openPopup();
     });
 
+    // $(document).ready(function() {
+    //   // add scrollspy to info box
+    //   $('#coordinates').scrollspy({target: ""})
+
+    // })
 
 
     // Toggling layers by event category
@@ -859,26 +880,26 @@
       }
 
 
-    // experiment.
-    function addPath(results) {
-      // console.log(results);
-      var line_points = results.geometry;
-      console.log(line_points);
-      var polyline_options = {
-        // stroke: true,
-        color: 'red',
-        weight: 5,
-        opacity: 0.65,
-        // fill: true,
-        // lineJoin: "round",
-        // lineCap: "round",
-        // clickable: true,
-        // className: "path"
-      };
-      var polyline = L.polyline(line_points, polyline_options).addTo(map);
-      console.log(polyline);
-      console.log("Finished add path");
-    };
+    // // experiment.
+    // function addPath(results) {
+    //   // console.log(results);
+    //   var line_points = results.geometry;
+    //   console.log(line_points);
+    //   var polyline_options = {
+    //     // stroke: true,
+    //     color: 'red',
+    //     weight: 5,
+    //     opacity: 0.65,
+    //     // fill: true,
+    //     // lineJoin: "round",
+    //     // lineCap: "round",
+    //     // clickable: true,
+    //     // className: "path"
+    //   };
+    //   var polyline = L.polyline(line_points, polyline_options).addTo(map);
+    //   console.log(polyline);
+    //   console.log("Finished add path");
+    // };
 
 
     // On click "Add to trip" button in marker popup, check duplicate

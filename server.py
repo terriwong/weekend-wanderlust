@@ -253,6 +253,11 @@ def save_trip():
     return "Session cleared!"
 
 
+@app.route('/hi_explorer')
+def hi_explorer():
+    """Testing page to greet explorers."""
+
+    return render_template("greet.html")
 
 
 # @app.route('/trip/<int:trip_id') # parallax scrolling helps story-telling
