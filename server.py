@@ -267,8 +267,10 @@ def hi_explorer():
 
 
 @app.route('/more_info_from_foursquare')
-def more_info_from_foursquare(marker_id):
+def more_info_from_foursquare():
     """Hit Foursquare venue api for more info about hiddengem's venue."""
+
+    marker_id = request.args.get('marker_id')
 
     CLIENT_ID = os.environ['FOURSQUARE_CLIENT_ID']
     CLIENT_SECRET = os.environ['FOURSQUARE_CLIENT_SECRET']
@@ -289,7 +291,7 @@ def more_info_from_foursquare(marker_id):
     json_data = json.loads(response.text)
 
     # get first 3 photo objects
-    photos = json_data['response']['venue']['photos']['groups'][0]['items'][:3]
+    photos = json_data['response']['venue']['photos']['groups'][0]['items'][:6]
 
     # extract just the photo url and store in a list
     photo_urls = []
@@ -298,13 +300,15 @@ def more_info_from_foursquare(marker_id):
         photo_urls.append(url)
 
     # get tips
-    tips = json_data['response']['venue']['tips']['groups'][0]['items'][:3]
+
+    tips = json_data['response']['venue']['tips']['groups'][0]['items'][:6]
     tips_list = []
     for item in tips:
-        tip = {}
-        tip['text'] = item['text']
-        tip['fname'] = item['user']['firstName']
-        tip['lname'] = item['user']['lastName']
+        tip = item['text']
+        # tip = {}
+        # tip['text'] = item['text']
+        # tip['fname'] = item['user']['firstName']
+        # tip['lname'] = item['user']['lastName']
 
         tips_list.append(tip)
 

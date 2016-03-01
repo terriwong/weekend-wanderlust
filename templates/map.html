@@ -478,7 +478,11 @@
 
     .ui-details-content,
     .ui-share-content {
-      padding: 100px 50px;
+      padding: 50px 50px;
+    }
+
+    .ui-share-content > h1 {
+      margin-bottom: 30px;
     }
 
     .commands {
@@ -605,6 +609,7 @@
       top: 55px;
       left: 0;
       width: 100%;
+      min-height: 490px;
     }
 
     .tabs-panels {
@@ -629,6 +634,13 @@
       overflow: auto;
       height: 490px;
       width: 575px;
+    }
+
+    .panel-photo {
+      position: relative;
+      width: 30%;
+      height: auto;
+      margin: 7px;
     }
 
     
@@ -670,25 +682,24 @@
     <span id="closeMoreInfoBtn" onclick="closeMoreInfoPanel()">x</span>
   </div>
   <div id="more-info" class="tabs-panels">  
-    <div id="section1" class="tabs-panel commands tabs-panel--active">
+    
+    <div id="section1" class="tabs-panel ui-details">
+      <div id="tips-content" class="ui-details-content">
+        <h1>Tips from Foursquare users</h1>
+      </div>
+    </div>
+    <div id="section2" class="tabs-panel ui-share">
+      <div class="ui-share-content">
+        <h1>Photos from Foursquare users</h1>
+        <div id="foursquare-photos"></div>
+      </div>
+    </div>
+    <div id="section3" class="tabs-panel commands">
       <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
       <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
       <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
 
       <li class="commands-item commands-item--gap"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
-    </div>
-    <div id="section2" class="tabs-panel ui-details">
-      <div class="ui-details-content">
-        <h1>Tips</h1>
-        <p id="tip-text">This is tip text.</p>
-        <p id="tip-author"><em>--first name last name</em></p>
-      </div>
-    </div>
-    <div id="section3" class="tabs-panel ui-share">
-      <div class="ui-share-content">
-        <h1>More photos from Foursqaure users</h1>
-        <div class="foursquare-photos"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -734,16 +745,37 @@
       document.getElementById('trip-panel').style.display = "none";
     }
 
-    // open panel to show more info from Yell/Foursquare api
-    function openMoreInfoPanel() {
-
-      document.getElementById("testing").className = "testing2 rotate";
-      // overlay.classList.toggle('overlay--visible');
-
-      // if (overlay.classList.contains('overlay--visible')) {
-      //   reset(true);
-      // }
+    function showInfo(results) {
+      // console.log(results);
+      var photoUrls = results.photos;
+      for (i=0; i < photoUrls.length; i++) {
+        var photoHtml = '<img src="' + photoUrls[i] + '" class="panel-photo">'
+        document.getElementById('foursquare-photos').innerHTML += photoHtml;
+      }
+      var tips = results.tips;
+      for (i=0; i < tips.length; i++) {
+        var tipHtml = '<p class="tip-text"><b>"</b>' + tips[i] +'<b>"</b></p>'
+        document.getElementById("tips-content").innerHTML += tipHtml;
+      }
+      console.log(tips);
     }
+    // open panel to show more info from Yell/Foursquare api
+    function openMoreInfoPanel(data) {
+      document.getElementById("testing").className = "testing2 rotate";
+      $.get('/more_info_from_foursquare', {'marker_id': data}, showInfo);
+      console.log(data);
+    }
+
+    // $('.drop').on('click', function(e) {
+    //   e.preventDefault();
+    //   $.get('/more_info_from_foursquare', {'marker_id': this.dataset.id}, showInfo);
+    //   console.log("Finished showInfo");
+    //   // overlay.classList.toggle('overlay--visible');
+
+    //   // if (overlay.classList.contains('overlay--visible')) {
+    //   //   reset(true);
+    //   // }
+    // });
 
     function closeMoreInfoPanel() {
       document.getElementById("testing").className = "testing2";
@@ -758,7 +790,7 @@
         photos.className = "tabs-label";
         other.className = "tabs-label";
         this.className = "tabs-label tabs-label--active";
-        $('#more-info').scrollTo('#section1', {duration: 'slow', offset:{top:-55}});        
+        $('#more-info').scrollTo('#section1', {duration: 'slow'});        
     };
 
     photos.onclick = function(e) {
@@ -773,7 +805,7 @@
         tips.className = "tabs-label";
         photos.className = "tabs-label";
         this.className = "tabs-label tabs-label--active";
-        $('#more-info').scrollTo('#section3', {duration: 'slow'}); 
+        $('#more-info').scrollTo('#section3', {duration: 'slow', offset:{top:-55}}); 
     };
 
     // function openInfoPanel1() {
@@ -1035,7 +1067,7 @@
 
         // check if marker is in view, if yes, construct contents to show in preview box
         if (bounds.contains(marker.getLatLng())) {
-          var listContent = '<div><img id="' + marker.feature.id + '"class="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '" data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" data-id="' + marker.feature.id + '" onclick="openMoreInfoPanel()"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
+          var listContent = '<div><img id="' + marker.feature.id + '"class="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '" data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" data-id="' + marker.feature.id + '" onclick="openMoreInfoPanel('+ marker.feature.id +')"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
             
           document.getElementById('coordinates').innerHTML += listContent;
         }
