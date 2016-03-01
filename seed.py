@@ -18,7 +18,11 @@ def load_markers(file):
             # row = row.rstrip()
             # print row.split("\t")
 
-            # 0)title, 1)description, 2)date, 3)date-tier, 4)time, 5)name(venue), 6)neighborhood, 7)city, 8)address, 9)latitude, 10)longitude, 11)cost, 12)img_url, 13)event_url, 14)category, 15)marker_type, 16)marker_symbol, 17)marker_color = row.split("\t")
+            # 0)title, 1)description, 2)date, 3)date-tier, 4)time, 
+            # 5)name(venue), 6)foursquare_id, 7)neighborhood, 8)city, 9)address, 
+            # 10)latitude, 11)longitude, 12)cost, 13)img_url, 14)event_url, 
+            # 15)category, 16)marker_type, 17)marker_symbol, 18)marker_color,
+            # 19) datetime_obj (new cell) 
 
         csvreader = csv.reader(csvfile)
 
@@ -34,24 +38,25 @@ def load_markers(file):
                 datetime_obj = None
 
             marker = Marker(title=row[0],
-                            address=row[8],
-                            latitude=row[9],
-                            longitude=row[10],
+                            address=row[9],
+                            latitude=row[10],
+                            longitude=row[11],
                             date=row[2],
                             date_tier=row[3],
                             time=row[4],
                             name=row[5],
-                            neighborhood=row[6],
-                            city=row[7],
+                            neighborhood=row[7],
+                            city=row[8],
                             description=row[1],
-                            cost=row[11],
-                            img_url=row[12],
-                            event_url=row[13],
-                            category=row[14],
-                            marker_type=row[15],
-                            marker_symbol=row[16],
-                            marker_color=row[17],
-                            datetime=datetime_obj)
+                            cost=row[12],
+                            img_url=row[13],
+                            event_url=row[14],
+                            category=row[15],
+                            marker_type=row[16],
+                            marker_symbol=row[17],
+                            marker_color=row[18],
+                            datetime=datetime_obj,
+                            foursquare_id=row[6])
 
             db.session.add(marker)
 
@@ -99,5 +104,5 @@ if __name__ == '__main__':
     connect_to_db(app)
     db.create_all()
 
-    load_markers('data/markers-20160226.csv')
+    load_markers('data/markers-20160228.csv')
     # load_hiddengems()

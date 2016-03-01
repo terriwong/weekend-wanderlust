@@ -297,6 +297,58 @@
       display: none;
     }
 
+    .testing2 {
+      position: absolute;
+      top: 50%;
+      left: 55%;
+      width: 575px;
+      height: 490px;
+      background: rgba(0,0,0,.2);
+      margin: -260px 0 0 -275px;
+      opacity: 0;
+      z-index: 999;
+      /*overflow: auto;*/
+      -webkit-transform: rotateY(90deg);
+      /*-moz-transform: rotateY(90deg);
+      -ms-transform: rotateY(90deg);
+      -o-transform: rotateY(90deg);*/
+      /*transform: rotateY(90deg);*/
+      -webkit-perspective: 1000;
+      -webkit-perspective-origin-y:25%;
+      /*-webkit-transition: -webkit-transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                        display 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -moz-transition: -moz-transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                        display 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -ms-transition: -ms-transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                        display 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -o-transition: -o-transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                        display 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      transition: transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1), 
+                        display 0.7s cubic-bezier(0.694, 0.482, 0.335, 1);*/
+      -webkit-transition: -webkit-transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1);
+    }
+
+    .rotate {
+      opacity: 1;    
+      -webkit-transform: rotateY(0);
+      /*-moz-transform: rotateY(0);
+      -ms-transform: rotateY(0);
+      -o-transform: rotateY(0);
+      transform: rotateY(0);*/
+
+    }
+
+    #closeMoreInfoBtn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;  
+      font-weight: 300;
+      cursor: pointer;
+      color: black;
+    }
+
     #waypoint-list {
 
     }
@@ -345,6 +397,7 @@
       display: inline-block;
       padding: 2px 5px;
       color: white;
+      cursor: pointer;
     }
 
     .box {
@@ -384,6 +437,200 @@
       border: 2px solid #33cccc;
     }
 
+    #moreInfoPanel {
+      display: none;
+    }
+
+    .overlay {
+      z-index: 999;
+      position: absolute;
+/*      top: 50%;
+      left: 50%;
+*/      width: 550px;
+      height: 490px;
+/*      margin: -260px 0 0 -275px;
+*/      /*opacity: 0;*/
+      /*display: none;*/
+
+      -webkit-transform: rotateY(90deg);
+      -moz-transform: rotateY(90deg);
+      -ms-transform: rotateY(90deg);
+      -o-transform: rotateY(90deg);
+      transform: rotateY(90deg);
+    }
+
+    .overlay--visible {
+      opacity: 1;
+
+      -webkit-transform: rotateY(0);
+      -moz-transform: rotateY(0);
+      -ms-transform: rotateY(0);
+      -o-transform: rotateY(0);
+      transform: rotateY(0);
+    }
+
+    .ui-details,
+    .ui-share {
+      opacity: .9;
+      background: #fff;
+      z-index: 2;
+    }
+
+    .ui-details-content,
+    .ui-share-content {
+      padding: 100px 50px;
+    }
+
+    .commands {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .commands-item {
+      font-size: 12px;
+      line-height: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 20px;
+      background: #fff;
+      margin-top: 1px;
+      color: #333;
+      opacity: .9;
+
+      -webkit-transition: -webkit-transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                      opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -moz-transition: -moz-transform 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                      opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -ms-transition: -ms-transform 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                      opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -o-transition: -o-transform 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                      opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      transition: transform 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1),
+                      opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+    }
+
+    .commands-item--gap {
+      margin-top: 9px;
+    }
+
+    .commands-item:hover {
+      opacity: 1;
+    }
+
+    .commands-item:hover .commands-item-action {
+      background: #333;
+    }
+
+    .commands-item-title {
+      display: inline-block;
+      width: 150px;
+    }
+
+    .commands-item-info {
+      display: inline-block;
+      width: 300px;
+      font-size: 14px;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: normal;
+      color: #aaa;
+    }
+
+    .commands-item-action {
+      display: inline-block;
+      float: right;
+      margin-top: 3px;
+      text-transform: uppercase;
+      font-size: 10px;
+      line-height: 10px;
+      color: #fff;
+      background: #90c9d1;
+      padding: 5px 10px 4px 10px;
+      border-radius: 3px;
+    }
+
+    .commands-item:first-child {
+      margin-top: 0;
+    }
+
+    .tabs-labels {
+      margin-bottom: 9px;
+      position: fixed;
+      background: white;
+    }
+
+    .tabs-label {
+      display: inline-block;
+      background: #fff;
+      padding: 10px 20px;
+      font-size: 12px;
+      line-height: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #333;
+      opacity: .5;
+      cursor: pointer;
+      margin-right: 2px;
+      border: 2px solid #333;
+
+      -webkit-transition: opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -moz-transition: opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -ms-transition: opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      -o-transition: opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+      transition: opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
+    }
+
+    .tabs-label:hover {
+      opacity: .9;
+    }
+
+    .tabs-label--active {
+      opacity: .9;
+    }
+
+    .tabs-panel {
+      display: block;
+    }
+
+    .tabs-panel--active {
+      display: block;
+    }
+
+    .tabs-panel {
+      position: relative;
+      top: 55px;
+      left: 0;
+      width: 100%;
+    }
+
+    .tabs-panels {
+      /*position: absolute;*/
+      /*overflow: auto;*/
+      display: block;
+    }
+
+    #tabs-bar {
+      position: fixed;
+      top: 0;
+      /*left: 5px;*/
+      z-index: 9999;
+      width: 565px;
+      height: 50px;
+      background-color: white;
+      padding: 5px;
+    }
+
+
+    #more-info {
+      overflow: auto;
+      height: 490px;
+      width: 575px;
+    }
+
     
     </style>
 </head>
@@ -407,12 +654,44 @@
 
 <div id='map'></div>
 
-<div class='label' id='start'>Click an event to uncover hiddengems</div>
+
+<div class='label' id='start'>Click an event to show nearby</div>
 <div class='label hide' id='gems'><b><span id="counter"></span></b> hiddengems within 1 mile</div>
 <div class='label hide' id='explorer'><b>Explorer circle</b></div>
 
 <!-- Info box with scroll spy -->
-<div id='coordinates' class='ui' data-spy="scroll" data-target="#myScrollspy" data-offset="20"></div>
+<div id='coordinates' class='ui'></div>
+
+<div id="testing" class='testing2'>
+  <div id="tabs-bar" class="tabs-labels">
+    <span class="tabs-label tabs-label--active" id="tab-tips">Tips</span>
+    <span class="tabs-label" id="tab-photos">Photos</span>
+    <span class="tabs-label" id="tab-other">Other</span>
+    <span id="closeMoreInfoBtn" onclick="closeMoreInfoPanel()">x</span>
+  </div>
+  <div id="more-info" class="tabs-panels">  
+    <div id="section1" class="tabs-panel commands tabs-panel--active">
+      <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
+      <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
+      <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
+
+      <li class="commands-item commands-item--gap"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
+    </div>
+    <div id="section2" class="tabs-panel ui-details">
+      <div class="ui-details-content">
+        <h1>Tips</h1>
+        <p id="tip-text">This is tip text.</p>
+        <p id="tip-author"><em>--first name last name</em></p>
+      </div>
+    </div>
+    <div id="section3" class="tabs-panel ui-share">
+      <div class="ui-share-content">
+        <h1>More photos from Foursqaure users</h1>
+        <div class="foursquare-photos"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <p class="flip" onclick="openPanel()">Click to open Trip Panel</p>
 <div id="trip-panel">
@@ -448,6 +727,7 @@
 
     function openPanel() {
       document.getElementById('trip-panel').style.display = "block";
+      console.log("Finished open Trip Panel");
     }
 
     function closePanel() {
@@ -456,8 +736,54 @@
 
     // open panel to show more info from Yell/Foursquare api
     function openMoreInfoPanel() {
-      // to be developed
+
+      document.getElementById("testing").className = "testing2 rotate";
+      // overlay.classList.toggle('overlay--visible');
+
+      // if (overlay.classList.contains('overlay--visible')) {
+      //   reset(true);
+      // }
     }
+
+    function closeMoreInfoPanel() {
+      document.getElementById("testing").className = "testing2";
+    }
+
+    // Scroll to sections in More Info Panel
+    var tips = document.getElementById('tab-tips');
+    var photos = document.getElementById('tab-photos');
+    var other = document.getElementById('tab-other');
+
+    tips.onclick = function(e) {
+        photos.className = "tabs-label";
+        other.className = "tabs-label";
+        this.className = "tabs-label tabs-label--active";
+        $('#more-info').scrollTo('#section1', {duration: 'slow', offset:{top:-55}});        
+    };
+
+    photos.onclick = function(e) {
+        tips.className = "tabs-label";
+        other.className = "tabs-label";
+        this.className = "tabs-label tabs-label--active";
+        $('#more-info').scrollTo('#section2', {duration: 'slow'});        
+
+    };
+
+    other.onclick = function(e) {
+        tips.className = "tabs-label";
+        photos.className = "tabs-label";
+        this.className = "tabs-label tabs-label--active";
+        $('#more-info').scrollTo('#section3', {duration: 'slow'}); 
+    };
+
+    // function openInfoPanel1() {
+    //   // var infoPanelId = "info-panel-" + target;
+    //   document.getElementById("tabs-label-1").className = "tabs-label tabs-label--active";
+    //   document.getElementById("tabs-label-1").className = "tabs-label tabs-label--active";
+
+    //   // var tabsLabelId = "tabs-label-" + target;
+    //   document.getElementById(tabsLabelId).classList.toggle("tabs-label--active");
+    // }
 
     // load mapbox public access token.
     L.mapbox.accessToken = 'pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ';
@@ -523,7 +849,6 @@
     //   });
     // }
 
-
     // function to count hiddengems within radius circle
     function countWithin(e) {
       var counter = 0;
@@ -577,6 +902,8 @@
       hiddengemLayer.setFilter(function showWithin(feature) {
         return true;
       });
+      document.getElementById('explorer').className = "label hide";
+      document.getElementById('start').className = "label show";
       console.log("Finished remove filterCircle");
     });
 
@@ -708,7 +1035,7 @@
 
         // check if marker is in view, if yes, construct contents to show in preview box
         if (bounds.contains(marker.getLatLng())) {
-          var listContent = '<div><img id="' + marker.feature.id + '"class="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '"data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" onclick="openMoreInfoPanel()"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
+          var listContent = '<div><img id="' + marker.feature.id + '"class="listImg" src="' + marker.feature.properties.img_url + '" /><div class="ui_box"><div class="ui_box__inner" id="container" data-id="' + marker.feature.id + '" data-latlng="' + marker.feature.geometry.coordinates + '">' + '<p><b>' + marker.feature.properties.name + '</b><br>' + marker.feature.properties.description + '</p></div><div class="drop" data-id="' + marker.feature.id + '" onclick="openMoreInfoPanel()"><p>Take a closer look</p><div class="arrow"></div></div></div></div>';
             
           document.getElementById('coordinates').innerHTML += listContent;
         }
@@ -947,7 +1274,6 @@
       e.preventDefault();
     });
 
-
     // commit to database about saved trip and clear session and waypoints list
     $('#clear-session').on('click', function(e){
       e.preventDefault();
@@ -958,11 +1284,6 @@
       $.get('/start_over', showStatus);
       console.log("Finished show status");
     });
-
-    // css position change
-    // things within container width 100%
-    // load geojson first, add to map later
-    // Interview cake
 
 </script>    
 </body>

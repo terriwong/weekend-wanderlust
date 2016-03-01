@@ -4,9 +4,10 @@ from jinja2 import StrictUndefined
 from flask import Flask, render_template, jsonify, request, session
 from flask_debugtoolbar import DebugToolbarExtension
 import os
+import json
 import requests
 from polyline.codec import PolylineCodec
-from datetime import date
+from datetime import date, datetime
 
 from model import connect_to_db, Marker
 
@@ -47,6 +48,8 @@ def events_json():
     """Geojson from database for event layer."""
 
     today = date.today()
+    # use date 0225 for testing purpose
+    today = today.replace(month=2, day=25)
 
     e_geojson = {
                 "type": "FeatureCollection",
@@ -261,6 +264,58 @@ def hi_explorer():
 
 
 # @app.route('/trip/<int:trip_id') # parallax scrolling helps story-telling
+
+
+@app.route('/more_info_from_foursquare')
+def more_info_from_foursquare(marker_id):
+    """Hit Foursquare venue api for more info about hiddengem's venue."""
+
+    CLIENT_ID = os.environ['FOURSQUARE_CLIENT_ID']
+    CLIENT_SECRET = os.environ['FOURSQUARE_CLIENT_SECRET']
+
+    # query marker info from database and get venue's foursquare id
+    marker = Marker.query.filter_by(marker_id=marker_id).first()
+    VENUE_ID = marker.foursquare_id
+
+    # get date string for request url
+    today = datetime.utcnow()
+    date_str = today.strftime("%Y%m%d")
+
+    # construct request url
+    url = "https://api.foursquare.com/v2/venues/" + VENUE_ID + "?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET + "&v=" + date_str
+    response = requests.get(url)
+
+    # try another way to load json data
+    json_data = json.loads(response.text)
+
+    # get first 3 photo objects
+    photos = json_data['response']['venue']['photos']['groups'][0]['items'][:3]
+
+    # extract just the photo url and store in a list
+    photo_urls = []
+    for photo in photos:
+        url = photo['prefix'] + "width300" + photo['suffix']
+        photo_urls.append(url)
+
+    # get tips
+    tips = json_data['response']['venue']['tips']['groups'][0]['items'][:3]
+    tips_list = []
+    for item in tips:
+        tip = {}
+        tip['text'] = item['text']
+        tip['fname'] = item['user']['firstName']
+        tip['lname'] = item['user']['lastName']
+
+        tips_list.append(tip)
+
+    # construct data needed
+
+    data = {
+        "photos": photo_urls,
+        "tips": tips_list
+    }
+
+    return jsonify(data)
 
 
 #---------------------------------#
