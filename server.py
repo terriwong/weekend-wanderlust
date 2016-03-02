@@ -8,6 +8,8 @@ import json
 import requests
 from polyline.codec import PolylineCodec
 from datetime import date, datetime
+import geocoder
+import urllib
 
 from model import connect_to_db, Marker
 
@@ -325,6 +327,20 @@ def more_info_from_foursquare():
 
     return jsonify(data)
 
+
+@app.route('/geocode_address')
+def geocode_address():
+    """Given address, hit Google Geocoding API, get geojson coordinates."""
+
+    address = request.args.get("address")
+
+    address_str = urllib.unquote_plus(str(address))  # format string from url
+    r = geocoder.google(address_str)  # google geocoding api
+    coordinates = r.geojson['geometry']['coordinates']  # [lng, lat]
+
+    data = {'coordinates': coordinates}
+
+    return jsonify(data)
 
 #---------------------------------#
 

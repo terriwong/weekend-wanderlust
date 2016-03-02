@@ -354,8 +354,8 @@
     }
 
     #waypoint-list li {
-      padding: 5px;
-      margin-left:20px;
+      padding: 3px;
+      /*margin-left:20px;*/
 /*      list-style-type: none;
 */    }
 
@@ -668,6 +668,20 @@
     #status {
       padding: 10px 5px 10px 0px;
     }
+
+    #type-address {
+      background: white;
+      /*color: #33cccc;*/
+      z-index: 999;
+      display: block;
+      position: absolute;
+      right: 10px;
+      top: 200px;
+      padding: 10px;
+      border: 2px solid #33cccc;
+      text-decoration: none;
+      min-width: 100px;
+    }
     
     </style>
 </head>
@@ -683,12 +697,13 @@
 </div>
 
 <div id='map'></div>
+<input id="type-address" type="text" name="address" placeholder="Type address and enter">
 <button id="geolocate" class='ui-button'>To current location</button>
 
 
 <div class='label' id='start'>Click an event to show nearby</div>
 <div class='label hide' id='gems'><b><span id="counter"></span></b> hiddengems within 1 mile</div>
-<div class='label hide' id='explorer'><b>Explorer circle</b></div>
+<div class='label hide' id='explorer'><b>Move the circle to discover more</b></div>
 
 <!-- Info box with scroll spy -->
 <div id='coordinates' class='ui'></div>
@@ -860,8 +875,8 @@
 
     // load base map, set initial position, add search controller.
     var map = L.mapbox.map('map', 'mapbox.streets')
-        .setView([37.71, -122.327], 10);
-        // .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
+        .setView([37.71, -122.327], 10)
+        .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
 
     // add event layer to map and load event markers geojson.
@@ -937,6 +952,7 @@
     // function to show hiddengems within radius circle
     function showWithin(e) {
       filterCircle.setLatLng(e.latlng);
+      console.log(e.latlng);
       hiddengemLayer.addTo(map);
       hiddengemLayer.setFilter(function showGems(feature) {
         return e.latlng.distanceTo(L.latLng(
@@ -1215,26 +1231,55 @@
       geolocate.innerHTML = 'Position could not be found';
     });
 
-    // // experiment.
-    // function addPath(results) {
-    //   // console.log(results);
-    //   var line_points = results.geometry;
-    //   console.log(line_points);
-    //   var polyline_options = {
-    //     // stroke: true,
-    //     color: 'red',
-    //     weight: 5,
-    //     opacity: 0.65,
-    //     // fill: true,
-    //     // lineJoin: "round",
-    //     // lineCap: "round",
-    //     // clickable: true,
-    //     // className: "path"
-    //   };
-    //   var polyline = L.polyline(line_points, polyline_options).addTo(map);
-    //   console.log(polyline);
-    //   console.log("Finished add path");
-    // };
+
+    function findAddress(results) {
+      console.log(results);
+      var lnglat = results.coordinates;
+      var addressLayer = L.mapbox.featureLayer().addTo(map);
+
+      var newMarker = {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: lnglat
+          },
+          properties: {
+            'title': 'We found it! Click to explore',
+            'marker-color': '#F03C02',
+            'marker-symbol': 'pitch'
+          }
+        };
+
+      addressLayer.setGeoJSON(newMarker).openPopup();
+
+      map.fitBounds(addressLayer.getBounds(), {
+        maxZoom: 14
+      });
+
+      var latlng = {
+        lat: lnglat[1],
+        lng: lnglat[0]
+      }
+      console.log(latlng);
+
+      addressLayer.on('click', function(e) {
+        filterCircle.setLatLng(e.latlng);
+        hiddengemLayer.addTo(map);
+        hiddengemLayer.setFilter(function showGems(feature) {
+      //   marker_latlng = newMarker.getLatLng();
+        return e.latlng.distanceTo(L.latLng(
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0])) < RADIUS;
+        });
+        showInView();
+        countWithin(e);
+      });
+      // showInView();
+      // countWithin();
+
+    }
+
+    
 
 
     // On click "Add to trip" button in marker popup, check duplicate
@@ -1291,6 +1336,16 @@
       console.log("Finished empty profile");
       $.get('/start_over', showStatus);
       console.log("Finished show status");
+    });
+
+    // when user press enter after typed in address, start findAddress process
+    $('#type-address').keypress(function(e) {
+      if(e.which == 13) {
+        var address = $(this).val();
+        console.log(address);
+        $.get('/geocode_address', {'address': address}, findAddress);
+        console.log("Finished toAddress");
+      }
     });
 
 </script>    
