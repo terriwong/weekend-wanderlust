@@ -135,19 +135,19 @@ def add_waypoint():
     print "this is waypoint id:", waypoint_id
 
     if 'waypoints' in session:
-        if len(session['waypoints']) < 12:
+        if len(session['waypoints']) < 6:
             if waypoint_id in session['waypoints']:
-                return "You have already selected it!"
+                return "You've already selected it!"
             else:
                 session['waypoints'].append(waypoint_id)
                 print session
-                return "Waypoint added to trip!"
+                return "Waypoint added!"
         else:
-            return "You can't select more than 12 waypoints!"
+            return "Sorry, you can't select more than 6 waypoints."
     else:
         session['waypoints'] = [waypoint_id]
         print session
-        return "Waypoint added to trip!"
+        return "Waypoint added!"
 
     print "session['waypoints']:", session['waypoints']
 
@@ -244,8 +244,8 @@ def get_route_polyline():
 
 
 @app.route('/start_over')
-def save_trip():
-    """Clear session."""
+def start_over():
+    """Clear waypoint list and profile in session, return message."""
 
     # commit waypoint sequence to database before clean
 
@@ -253,7 +253,7 @@ def save_trip():
     session['profile'] = ""
     print "updated session:", session
 
-    return "Session cleared!"
+    return "Trip board cleared!"
 
 
 @app.route('/hi_explorer')
@@ -300,23 +300,27 @@ def more_info_from_foursquare():
         photo_urls.append(url)
 
     # get tips
-
     tips = json_data['response']['venue']['tips']['groups'][0]['items'][:6]
     tips_list = []
     for item in tips:
         tip = item['text']
-        # tip = {}
-        # tip['text'] = item['text']
-        # tip['fname'] = item['user']['firstName']
-        # tip['lname'] = item['user']['lastName']
-
         tips_list.append(tip)
 
-    # construct data needed
+    # get hours
+    if "hours" in json_data['response']['venue']:
+        hours_info = json_data['response']['venue']['hours']['timeframes']
+    else:
+        hours_info = []
 
+    # get popular hours
+    popular_hours_info = json_data['response']['venue']['popular']['timeframes']
+
+    # construct data needed
     data = {
         "photos": photo_urls,
-        "tips": tips_list
+        "tips": tips_list,
+        "hours": hours_info,
+        "popular_hours": popular_hours_info
     }
 
     return jsonify(data)

@@ -303,7 +303,7 @@
       left: 55%;
       width: 575px;
       height: 490px;
-      background: rgba(0,0,0,.2);
+      background: rgba(255,255,255,.2);
       margin: -260px 0 0 -275px;
       opacity: 0;
       z-index: 999;
@@ -402,19 +402,6 @@
 
     .box {
       padding: 5px;
-    }
-
-    #verticalbar {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      width: 3%;
-      background: rgba(0,0,0,.9);
-      height: 100%;
-      position: fixed;
-      overflow: auto;
-      z-index: 100;
-      visibility: hidden;
     }
 
     #popupButton {
@@ -518,6 +505,9 @@
 
     .commands-item--gap {
       margin-top: 9px;
+      opacity:1;
+      padding: 15px;
+      /*text-align: center;*/
     }
 
     .commands-item:hover {
@@ -525,7 +515,7 @@
     }
 
     .commands-item:hover .commands-item-action {
-      background: #333;
+      background: #33cccc;
     }
 
     .commands-item-title {
@@ -535,7 +525,6 @@
 
     .commands-item-info {
       display: inline-block;
-      width: 300px;
       font-size: 14px;
       text-transform: none;
       letter-spacing: 0;
@@ -556,8 +545,10 @@
       border-radius: 3px;
     }
 
-    .commands-item:first-child {
-      margin-top: 0;
+    .hours-title {
+      opacity: 1;
+      padding: 15px;
+      /*text-align: center;*/
     }
 
     .tabs-labels {
@@ -590,10 +581,14 @@
 
     .tabs-label:hover {
       opacity: .9;
+      color: #33cccc;
+      border-color: #33cccc;
     }
 
     .tabs-label--active {
       opacity: .9;
+      color: #33cccc;
+      border-color: #33cccc;
     }
 
     .tabs-panel {
@@ -643,17 +638,40 @@
       margin: 7px;
     }
 
+    .ui-button {
+      background: white;
+      color: #33cccc;
+      display: block;
+      position: absolute;
+      right: 10px;
+      top: 160px;
+      z-index: 999;
+      text-align: center;
+      padding: 10px;
+      border: 2px solid #33cccc;
+      text-decoration: none;
+      font-size: 12px;
+      font-family: 'Nunito', sans-serif;  
+      font-weight: 300;
+      opacity: .9;
+      cursor: pointer;
+    }
+
+    .ui-button:hover {
+      background: #33cccc;
+      color: white;
+      text-decoration: none;
+      opacity: 1;
+      /*font-weight: bold;*/
+    }
+
+    #status {
+      padding: 10px 5px 10px 0px;
+    }
     
     </style>
 </head>
 <body>
-
-<ul id="verticalbar">
-  <li><a href="#">Home</a></li>
-  <li><a href="#">Blog</a></li>
-  <li><a href="#">Contact</a></li>
-  <li><a href="#">About</a></li>
-</ul>
 
 <div class='sidebar pad2'>
 <nav id='menu-ui' class='menu-ui pad2'>
@@ -665,6 +683,7 @@
 </div>
 
 <div id='map'></div>
+<button id="geolocate" class='ui-button'>To current location</button>
 
 
 <div class='label' id='start'>Click an event to show nearby</div>
@@ -678,28 +697,29 @@
   <div id="tabs-bar" class="tabs-labels">
     <span class="tabs-label tabs-label--active" id="tab-tips">Tips</span>
     <span class="tabs-label" id="tab-photos">Photos</span>
-    <span class="tabs-label" id="tab-other">Other</span>
+    <span class="tabs-label" id="tab-other">Hours</span>
     <span id="closeMoreInfoBtn" onclick="closeMoreInfoPanel()">x</span>
   </div>
   <div id="more-info" class="tabs-panels">  
     
     <div id="section1" class="tabs-panel ui-details">
-      <div id="tips-content" class="ui-details-content">
+      <div class="ui-details-content">
         <h1>Tips from Foursquare users</h1>
+        <div id="tips-content"></div>
       </div>
     </div>
     <div id="section2" class="tabs-panel ui-share">
       <div class="ui-share-content">
-        <h1>Photos from Foursquare users</h1>
+        <h1>Latest photos from Foursquare</h1>
         <div id="foursquare-photos"></div>
       </div>
     </div>
     <div id="section3" class="tabs-panel commands">
-      <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
-      <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
-      <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
-
-      <li class="commands-item commands-item--gap"><span class="commands-item-title">Text</span><span class="commands-item-info" data-demo="Hello:)">Type anything</span><span class="commands-item-action">Demo</span></li>
+      <li class="commands-item hours-title"><span class="commands-item-title">Normal Hours</span></li>
+      <div id="normal-hours-content"></div>
+      
+      <li class="commands-item commands-item--gap hours-title"><span class="commands-item-title">Popular Hours</span></li>
+      <div id="popular-hours-content"></div>
     </div>
   </div>
 </div>
@@ -715,7 +735,9 @@
     <b>Distance: </b><div id="distance" class="inline"></div><br>
     <b>Estimated time: </b><div id="duration" class="inline"></div><br>
   </div>
-  <div id='status'></div><br>
+
+  <div id="status"></div>
+
   <form action="/get_profile">
     Way of traveling:<br>
     <input type="radio" name="profile" value="walking">Walking
@@ -725,7 +747,7 @@
 
   <button id="get-route">Show route</button>
   <button id="clear-route">Clear route</button>
-  <button id="clear-session">Clear session</button><br>
+  <button id="start-over">Start over</button><br>
 
   <button id="show-circle">1 mile circle</button>
   <button id="remove-circle">remove circle</button> 
@@ -745,8 +767,13 @@
       document.getElementById('trip-panel').style.display = "none";
     }
 
+    // display info in More-info box
     function showInfo(results) {
-      // console.log(results);
+      console.log(results);
+      $('#foursquare-photos').empty();
+      $('#tips-content').empty();
+      $('#normal-hours-content').empty();
+      $('#popular-hours-content').empty();
       var photoUrls = results.photos;
       for (i=0; i < photoUrls.length; i++) {
         var photoHtml = '<img src="' + photoUrls[i] + '" class="panel-photo">'
@@ -757,8 +784,19 @@
         var tipHtml = '<p class="tip-text"><b>"</b>' + tips[i] +'<b>"</b></p>'
         document.getElementById("tips-content").innerHTML += tipHtml;
       }
-      console.log(tips);
+      var normalHours = results.hours;
+      for (i=0; i < normalHours.length; i++) {
+        var normalHoursHtml = '<li class="commands-item"><span class="commands-item-title">' + normalHours[i].days + '</span><span class="commands-item-info">' + normalHours[i].open[0].renderedTime + '</span><span class="commands-item-action" onclick="addTripNote()">Add trip note</span></li>';
+        document.getElementById("normal-hours-content").innerHTML += normalHoursHtml;
+      }
+      var popularHours = results.popular_hours;
+      for (i=0; i < popularHours.length; i++) {
+        var popularHoursHtml = '<li class="commands-item"><span class="commands-item-title">' + popularHours[i].days + '</span><span class="commands-item-info">' + popularHours[i].open[0].renderedTime + '</span><span class="commands-item-action" onclick="addTripNote()">Add trip note</span></li>';
+        document.getElementById("popular-hours-content").innerHTML += popularHoursHtml;
+      }
+      // console.log(tips);
     }
+
     // open panel to show more info from Yell/Foursquare api
     function openMoreInfoPanel(data) {
       document.getElementById("testing").className = "testing2 rotate";
@@ -822,8 +860,9 @@
 
     // load base map, set initial position, add search controller.
     var map = L.mapbox.map('map', 'mapbox.streets')
-        .setView([37.71, -122.327], 10)
-        .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
+        .setView([37.71, -122.327], 10);
+        // .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
+
 
     // add event layer to map and load event markers geojson.
     var eventLayer = L.mapbox.featureLayer().addTo(map);
@@ -834,7 +873,7 @@
 
     // when click on any event marker, zoom in and show nearby hiddengems
     eventLayer.on('click', function(e) {
-        map.setView(e.latlng, 13);
+        map.setView(e.latlng, 14);
         map.panTo(e.latlng);
         hiddengemLayer.addTo(map);
         showWithin(e);
@@ -890,6 +929,8 @@
           counter += 1;
         }
       });
+      document.getElementById('start').className = "label hide";
+      document.getElementById('gems').className = "label";
       document.getElementById('counter').innerHTML = counter;
     }
 
@@ -905,10 +946,10 @@
     }
 
     // given an address and showWithin
-    map.on('click', function() {
-      showWithin();
-      countWithin();
-    });
+    // map.on('click', function() {
+    //   showWithin();
+    //   countWithin();
+    // });
 
 
     //  Explorer mode: 1 mile radius circle on mousemove
@@ -918,6 +959,7 @@
         countWithin(e);
       });
       map.on('click', function(e) {
+        map.off('mousemove');
         showWithin(e);
         countWithin(e);
       });
@@ -938,125 +980,6 @@
       document.getElementById('start').className = "label show";
       console.log("Finished remove filterCircle");
     });
-
-    // experiment no success, used another approach to achieve goal, try later.
-    // $('#turf-buffer').on('click', function() {
-    //   map.on('click', function(e) {
-    //     // var t = e.latlng;
-    //     // // console.log(t);
-    //     // var lat = t.lat;
-    //     // var lng = t.lng;
-    //     var pt = turf.point([37.748457761603355, -122.4326705932617], {
-    //         "description": "explorer",
-    //         "marker-color": "#6BC65F",
-    //         "marker-size": "large",
-    //         "marker-symbol": "pitch"
-    //       });
-    //     var ptLayer = L.mapbox.featureLayer().addTo(map);
-    //     ptLayer.setGeoJSON(pt);
-    //     console.log(pt);
-
-        
-    //     var bufferLayer = L.mapbox.featureLayer().addTo(map);
-
-    //     ptLayer.eachLayer(function(layer) {
-    //       layer.options.draggable = true;
-    //       layer.on('drag', function(e) {
-    //         calculateBuffer();
-    //       });
-    //     });
-
-    //     function calculateBuffer() {
-    //       var pt = turf.featurecollection(ptLayer.getLayers().map(function(f) {
-    //         return f.toGeoJSON()
-    //       }));
-    //       // console.log(pt);
-    //       var buffer = turf.buffer(pt, 1, 'miles');
-    //       beffer.properties = {
-    //         "fill": "#6BC65F",
-    //         "stroke": "#25561F",
-    //         "stroke-width": 2
-    //       };
-    //       befferLayer.setGeoJSON(buffer);
-    //     }
-    //     // var pt = {
-    //     //   "type": "Feature",
-    //     //   "properties": {
-    //     //     "marker-color": "#6BC65F",
-    //     //     "marker-size": "small"
-    //     //   },
-    //     //   "geometry": {
-    //     //     "type": "Point",
-    //     //     "coordinates": [lat, lng]
-    //     //     }
-    //     //   };
-    //     // console.log(pt);
-    //     var buffered = turf.buffer(pt, 100, 'miles');
-    //     buffered.properties = {
-    //       "fill": "#6BC65F",
-    //       "stroke": "#25561F",
-    //       "stroke-width": 2
-    //     };
-    //     // // console.log(buffered);
-    //     var results = turf.featurecollection(buffered);
-    //     console.log(results);
-    //     // var bufferLayer = L.mapbox.featureLayer().addTo(map);
-    //     // bufferLayer.setGeoJSON(results);
-    //     // var bufferLayer = L.geoJson().addTo(map);
-    //     // bufferLayer.addData(results);
-    //     // bufferLayer.setStyle({
-    //     //   "color": "#ff7800",
-    //     //   "weight": 5,
-    //     //   "opacity": 0.65 });
-        
-        
-    //     // ptLayer.eachLayer(function(layer) {
-    //     //   layer.options.draggable = true;
-    //     //   layer.on('drag', function(e) {
-    //     //     calculateBuffer();
-    //       });
-    //     });
-
-    //     // ptLayer.addTo(map);
-    //     // calculateBuffer();
-
-    //   //   function calculateBuffer() {
-    //   //     var pt = turf.featurecollection(ptLayer.getLayers().map(function(f) {
-    //   //       return f.toGeoJSON()
-    //   //     }));
-    //   //   var buffer = turf.buffer(pt, 1, 'miles');
-    //   //   buffer.properties = {
-    //   //     "fill": "#6BC65F",
-    //   //     "stroke": "#25561F",
-    //   //     "stroke-width": 2
-    //   //   };
-    //   //   bufferLayer.setGeoJSON(buffer);
-    //   //   }
-    //   //   });
-    //   // });
-    
-    //     // hiddengemLayer.setFilter(function showWithin(f) {
-    //     //   return (e.layer.getLatLng()).distanceTo(
-    //     //     f.geometry.coordinates[1],
-    //     //     f.geometry.coordinates[0]) < RADIUS;
-    //     // });
-    //     // $.get('/hiddengems.geojson', showWithin);
-    // //     var pt = {
-    // //       "type": "Feature",
-    // //       "properties": {},
-    // //       "geometry": {
-    // //         "type": "Point",
-    // //         "coordinates": currentLatLng
-    // //       }
-    // //     };
-    // //     var buffer = turf.butter(pt, 1, 'miles');
-    // //     buffer.properties = {
-    // //       "fill": "#6BC65F",
-    // //       "stroke": "#25561F",
-    // //       "stroke-width": 2
-    // //     };
-    // //     bufferLayer.setGeoJSON(buffer);
-    // // }); 
  
 
     function showInView() {
@@ -1193,14 +1116,19 @@
     }
 
     // helper function to show "add to trip" status
-    function showStatus(results) {
+    function addWaypoint(results) {
       var status = results;
-      $('#status').html(status);
+      $('#popupButton').html(status);
       console.log("Finished showStatus");
-      if (status == "Waypoint added to trip!") {
+      if (status == "Waypoint added!") {
         $.get('/update_waypoint_list', updateList);
         console.log("Finished update list");
       }
+    }
+
+    function showStatus(results) {
+      var status = results;
+      $('#status').html(status).addClass(".is-visible");
     }
 
     // helper function to update travel profile on planner panel
@@ -1227,7 +1155,9 @@
         // console.log for debugging
         console.log("Finished add routeLayer");
         // zoom to route
-        map.fitBounds(routeLayer.getBounds());
+        map.fitBounds(routeLayer.getBounds(), {
+          padding:[400, 200]
+        });
         // get distance (in meters) from api response
         var distance = (results.distance / 1609.34).toFixed(2);
         document.getElementById('distance').innerHTML = (distance + " miles");
@@ -1238,6 +1168,52 @@
         console.log("Finished show route");
       }
 
+    // get current location by HTML5 geolocation API
+    var geolocate = document.getElementById('geolocate');    
+    var currentLocationLayer = L.mapbox.featureLayer().addTo(map);
+    
+    if (!navigator.geolocation) {
+      geolocate.innerHTML = 'Geolocation is not available';
+    } else {
+      geolocate.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        map.locate();
+      };
+    }
+
+    map.on('locationfound', function(e) {
+      
+      map.fitBounds(e.bounds, {
+        maxZoom: 14
+      });
+
+      showWithin(e);
+      showInView(e);
+      countWithin(e);
+
+      var currentMarker = {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [e.latlng.lng, e.latlng.lat]
+          },
+          properties: {
+            'title': 'You are here!',
+            'marker-color': '#F03C02',
+            'marker-symbol': 'star'
+          }
+        };
+
+      currentLocationLayer.setGeoJSON(currentMarker).openPopup();
+
+        // hide the geolocation button
+        geolocate.parentNode.removeChild(geolocate);
+    });
+
+    map.on('locationerror', function() {
+      geolocate.innerHTML = 'Position could not be found';
+    });
 
     // // experiment.
     // function addPath(results) {
@@ -1267,7 +1243,7 @@
     $('#map').on('click', '.trigger', function (e){
       e.preventDefault();
       console.log(this.dataset.id);
-      $.get('/add_waypoint', {'marker_id': this.dataset.id}, showStatus);
+      $.get('/add_waypoint', {'marker_id': this.dataset.id}, addWaypoint);
       console.log("Finished sending AJAX to add_waypoint");
     });
 
@@ -1307,7 +1283,7 @@
     });
 
     // commit to database about saved trip and clear session and waypoints list
-    $('#clear-session').on('click', function(e){
+    $('#start-over').on('click', function(e){
       e.preventDefault();
       $('#waypoint-list').empty();
       console.log("Finished empty waypoint list");
