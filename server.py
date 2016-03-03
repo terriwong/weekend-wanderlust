@@ -282,6 +282,7 @@ def more_info_from_foursquare():
     marker = Marker.query.filter_by(marker_id=marker_id).first()
     VENUE_ID = marker.foursquare_id
     name = marker.name
+    address= marker.address
 
     # get date string for request url
     today = datetime.utcnow()
@@ -326,7 +327,8 @@ def more_info_from_foursquare():
         "photos": photo_urls,
         "tips": tips_list,
         "hours": hours_info,
-        "popular_hours": popular_hours_info
+        "popular_hours": popular_hours_info,
+        "address": address
     }
 
     return jsonify(data)
@@ -348,23 +350,60 @@ def geocode_address_for_coordinates():
 
 
 @app.route('/add_trip_note', methods=['POST'])
-def add_trip_note():
-    """Add trip note."""
+def add_trip_note_to_session():
+    """Add trip note to session."""
 
     marker_id = request.form["marker_id"]
     name = request.form["name"]
     selected_day = request.form["selected_day"]
     selected_hour = request.form["selected_hour"]
 
-    info = [marker_id, name, selected_day, selected_hour]
-    session['trip_note'][marker_id] = info 
+    info = [name, selected_day, selected_hour]
+    session['trip_note'][marker_id] = info
 
     if marker_id not in session['waypoints']:
         session['waypoints'].append(marker_id)
 
     update_waypoint_list()
+    print "session['trip_note']: ", session['trip_note']
 
-    return jsonify(session['trip_note'])
+    return "Trip noted added!"
+
+
+@app.route('/update_trip_note')
+def update_trip_note_to_board():
+    """Add trip note details to board."""
+
+    print "session['waypoints']: ", session['waypoints']
+    print "session['trip_note']: ", session['trip_note']
+    data = []
+
+    for marker_id in session['waypoints']:
+        info = {
+            "name": session['trip_note'][marker_id][0],
+            "selectedDay": session['trip_note'][marker_id][1],
+            "selectedHour": session['trip_note'][marker_id][2]
+        }
+
+        data.append(info)
+
+        data = {data}
+
+    return jsonify(data)
+
+
+@app.route('/trip_preview')
+def show_trip_preview():
+    """Extract data stored in session, return trip info for preview."""
+
+
+
+
+@app.route('/show_trip')
+def show_trip():
+    """Given waypoints, show trip details."""
+
+    return render_template("trip.html")
 
 
 #---------------------------------#
