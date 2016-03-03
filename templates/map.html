@@ -13,6 +13,8 @@
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
 
 <style>
+    @import url(https://fonts.googleapis.com/css?family=Nunito);
+
     body { margin:0; 
            padding:0; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
@@ -306,7 +308,7 @@
       background: rgba(255,255,255,.2);
       margin: -260px 0 0 -275px;
       opacity: 0;
-      z-index: 999;
+      z-index: 50;
       /*overflow: auto;*/
       -webkit-transform: rotateY(90deg);
       /*-moz-transform: rotateY(90deg);
@@ -429,7 +431,7 @@
     }
 
     .overlay {
-      z-index: 999;
+      z-index: 50;
       position: absolute;
 /*      top: 50%;
       left: 50%;
@@ -518,12 +520,12 @@
       background: #33cccc;
     }
 
-    .commands-item-title {
+    .item-title {
       display: inline-block;
       width: 150px;
     }
 
-    .commands-item-info {
+    .item-info {
       display: inline-block;
       font-size: 14px;
       text-transform: none;
@@ -535,14 +537,14 @@
     .commands-item-action {
       display: inline-block;
       float: right;
-      margin-top: 3px;
+      /*margin-top: 3px;*/
       text-transform: uppercase;
       font-size: 10px;
       line-height: 10px;
       color: #fff;
       background: #90c9d1;
       padding: 5px 10px 4px 10px;
-      border-radius: 3px;
+      /*border-radius: 3px;*/
     }
 
     .hours-title {
@@ -617,7 +619,7 @@
       position: fixed;
       top: 0;
       /*left: 5px;*/
-      z-index: 9999;
+      z-index: 50;
       width: 565px;
       height: 50px;
       background-color: white;
@@ -644,8 +646,8 @@
       display: block;
       position: absolute;
       right: 10px;
-      top: 160px;
-      z-index: 999;
+      top: 210px;
+      z-index: 50;
       text-align: center;
       padding: 10px;
       border: 2px solid #33cccc;
@@ -672,20 +674,240 @@
     #type-address {
       background: white;
       /*color: #33cccc;*/
-      z-index: 999;
+      z-index: 50;
       display: block;
       position: absolute;
       right: 10px;
-      top: 200px;
+      top: 170px;
       padding: 10px;
       border: 2px solid #33cccc;
       text-decoration: none;
       min-width: 100px;
     }
+
+    #addTripNote {
+      cursor: pointer;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: bold;
+      padding: 10px 15px;
+      color: #33cccc;
+      background-color: white;
+      border: 2px solid #33cccc;
+    }
+
+    #addTripNote:hover {
+      color: white;
+      background-color: #33cccc;
+    }
+
+    .button_testing {
+      position: fixed;
+      top: 5%;
+      right: 2%;
+      height: 27px;
+      width: 35px;
+      cursor: pointer;
+      /*z-index: 999;*/
+      transition: opacity .25s ease;
+
+      &:hover {
+        opacity: .7;
+      }
+
+      &.active {
+        .top {
+          transform: translateY(10px) translateX(0) rotate(45deg);
+          background: #fff;
+        }
+        .middle {
+          opacity: 0;
+          background: #fff;
+        }
+        .bottom {
+          transform: translateY(-10px) translateX(0) rotate(-45deg);
+          background: #fff;
+        }
+      }
+
+      span {
+        background: #FF5252;
+        border: none;
+        height: 5px;
+        width: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0;
+        transition: all .35s ease;
+        cursor: pointer;
+
+          &:nth-of-type(2) {
+            top: 10px;
+          }
+
+          &:nth-of-type(3) {
+            top: 20px;
+          }
+      }
+    }
+
+    .overlay-itinerary {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 1;
+      visibility: hidden;
+      transition: opacity .35s, visibility .35s, height .35s;
+      z-index: 50;
+
+      &:before {
+        content: '';
+        background: #FF5252;
+        left: -55%;
+        top: 0;
+        width: 50%;
+        height: 100%;
+        position: absolute;
+        transition: left .35s ease;
+      }
+
+      &:after {
+        content: '';
+        background: #FF5252;
+        right: -55%;
+        top: 0;
+        width: 50%;
+        height: 100%;
+        position: absolute;
+        transition: all .35s ease;
+      }
+
+      &.open {
+        opacity: .9;
+        visibility: visible;
+        height: 100%;
+
+        &:before {
+          left: 0;
+        }
+
+        &:after {
+          right: 0;
+        }
+
+        li {
+          animation: fadeInRight .5s ease forwards;
+          animation-delay: .35s;
+
+          &:nth-of-type(2) {
+            animation-delay: .45s;
+          }
+          &:nth-of-type(3) {
+            animation-delay: .55s;
+          }
+          &:nth-of-type(4) {
+            animation-delay: .65s;
+          }
+        }
+      }
+      nav {
+        position: relative;
+        height: 70%;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 50px;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 400;
+        text-align: center;
+        z-index: 50;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 auto;
+        display: inline-block;
+        position: relative;
+        height: 100%;
+
+        li {
+          display: block;
+          height: 25%;
+          height: calc(100% / 4);
+          min-height: 50px;
+          position: relative;
+          opacity: 0;
+
+          a {
+            display: block;
+            position: relative;
+            color: #FFF;
+            text-decoration: none;
+            overflow: hidden;
+
+            &:hover:after,
+            &:focus:after,
+            &:active:after {
+              width: 100%;
+            }
+
+            &:after {
+              content: '';
+              position: absolute;
+              bottom: 0;
+              left: 50%;
+              width: 0%;
+              transform: translateX(-50%);
+              height: 3px;
+              background-color: #FFF;
+              transition: .35s;
+            }
+          }
+        }
+      }
+    }
+
+    @keyframes fadeInRight {
+      0% {
+        opacity: 0;
+        left: 20%;
+      }
+      100% {
+        opacity: 1;
+        left: 0;
+      }
+    }
+
+
+    .casual-test {
+      background: rgba(0,0,0,.4);
+      height: 20%;
+      width: 100%;
+      z-index: 55;
+    }
     
     </style>
 </head>
 <body>
+
+  <!-- Overlay itinerary -->
+<div class="casual-test"></div>
+<div class="button_testing" id="toggle">
+  <span class="top"></span>
+  <span class="middle"></span>
+  <span class="bottom"></span>
+</div>
+<div class="overlay-itinerary" id="overlay-itinerary">
+  <nav class="overlay-itinerary-menu">
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Work</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </nav>
+</div> 
 
 <div class='sidebar pad2'>
 <nav id='menu-ui' class='menu-ui pad2'>
@@ -698,7 +920,7 @@
 
 <div id='map'></div>
 <input id="type-address" type="text" name="address" placeholder="Type address and enter">
-<button id="geolocate" class='ui-button'>To current location</button>
+<button id="geolocate" class='ui-button'>Get current location</button>
 
 
 <div class='label' id='start'>Click an event to show nearby</div>
@@ -730,10 +952,10 @@
       </div>
     </div>
     <div id="section3" class="tabs-panel commands">
-      <li class="commands-item hours-title"><span class="commands-item-title">Normal Hours</span></li>
+      <li class="commands-item hours-title"><span class="item-title">Normal Hours</span></li>
       <div id="normal-hours-content"></div>
       
-      <li class="commands-item commands-item--gap hours-title"><span class="commands-item-title">Popular Hours</span></li>
+      <li class="commands-item commands-item--gap hours-title"><span class="item-title">Popular Hours</span></li>
       <div id="popular-hours-content"></div>
     </div>
   </div>
@@ -751,27 +973,34 @@
     <b>Estimated time: </b><div id="duration" class="inline"></div><br>
   </div>
 
-  <div id="status"></div>
-
   <form action="/get_profile">
     Way of traveling:<br>
     <input type="radio" name="profile" value="walking">Walking
     <input type="radio" name="profile" value="cycling">Cycling
     <input type="radio" name="profile" value="driving">Driving<br>
   </form><br>
+  <div id="trip-note-content"></div>
+  <div id="status"></div>
 
   <button id="get-route">Show route</button>
   <button id="clear-route">Clear route</button>
   <button id="start-over">Start over</button><br>
 
-  <button id="show-circle">1 mile circle</button>
-  <button id="remove-circle">remove circle</button> 
+  <button id="show-circle">Explorer circle</button>
+  <button id="remove-circle">Remove circle</button> 
   <button id="save-trip">Save trip</button>
-</div> 
+</div>
+
+
 
 <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="//cdn.jsdelivr.net/jquery.scrollto/2.1.2/jquery.scrollTo.min.js"></script>
 <script>
+
+    $('#toggle').click(function() {
+        $(this).toggleClass('active');
+        $('#overlay').toggleClass('open');
+    });
 
     function openPanel() {
       document.getElementById('trip-panel').style.display = "block";
@@ -789,6 +1018,8 @@
       $('#tips-content').empty();
       $('#normal-hours-content').empty();
       $('#popular-hours-content').empty();
+      var markerId = results.marker_id;
+      var venueName = results.name;
       var photoUrls = results.photos;
       for (i=0; i < photoUrls.length; i++) {
         var photoHtml = '<img src="' + photoUrls[i] + '" class="panel-photo">'
@@ -801,16 +1032,41 @@
       }
       var normalHours = results.hours;
       for (i=0; i < normalHours.length; i++) {
-        var normalHoursHtml = '<li class="commands-item"><span class="commands-item-title">' + normalHours[i].days + '</span><span class="commands-item-info">' + normalHours[i].open[0].renderedTime + '</span><span class="commands-item-action" onclick="addTripNote()">Add trip note</span></li>';
-        document.getElementById("normal-hours-content").innerHTML += normalHoursHtml;
+        var normalHoursHtml = '<li class="commands-item"><span class="item-title">' + normalHours[i].days + '</span><span class="item-info">' + normalHours[i].open[0].renderedTime + '</span><button class="commands-item-action" id="addTripNote" data-id="' + markerId + '" data-name="' + venueName + '">Add trip note</button></li>';
+        $('#normal-hours-content').append(normalHoursHtml);
+        // document.getElementById("normal-hours-content").innerHTML += normalHoursHtml;
       }
       var popularHours = results.popular_hours;
       for (i=0; i < popularHours.length; i++) {
-        var popularHoursHtml = '<li class="commands-item"><span class="commands-item-title">' + popularHours[i].days + '</span><span class="commands-item-info">' + popularHours[i].open[0].renderedTime + '</span><span class="commands-item-action" onclick="addTripNote()">Add trip note</span></li>';
-        document.getElementById("popular-hours-content").innerHTML += popularHoursHtml;
+        var popularHoursHtml = '<li class="commands-item"><span class="item-title">' + popularHours[i].days + '</span><span class="item-info">' + popularHours[i].open[0].renderedTime + '</span><button class="commands-item-action"  id="addTripNote" data-id="' + markerId + '" data-name="' + venueName +'">Add trip note</button></li>';
+        $('#popular-hours-content').append(popularHoursHtml);
+        // document.getElementById("popular-hours-content").innerHTML += popularHoursHtml;
       }
       // console.log(tips);
     }
+
+    function updateBoard(results) {
+      console.log(results);
+    }
+
+    $("#more-info").on('click', '#addTripNote', (function(e) {
+      e.preventDefault();
+      $(this).text("Trip note added!");
+      var day = $(this).prev().prev().text();
+      console.log(day);
+      var hours = $(this).prev().text();
+      console.log(hours);
+      var target = document.querySelector('#addTripNote');
+      var targetId = target.dataset.id;
+      var targetName = target.dataset.name;
+      console.log(targetId);
+      $.post('/add_trip_note', {
+                              "marker_id": targetId,
+                              "name": targetName,
+                              "selected_day": day,
+                              "selected_hour": hours
+                            }, updateBoard);
+    }));
 
     // open panel to show more info from Yell/Foursquare api
     function openMoreInfoPanel(data) {
@@ -1266,7 +1522,6 @@
         filterCircle.setLatLng(e.latlng);
         hiddengemLayer.addTo(map);
         hiddengemLayer.setFilter(function showGems(feature) {
-      //   marker_latlng = newMarker.getLatLng();
         return e.latlng.distanceTo(L.latLng(
           feature.geometry.coordinates[1],
           feature.geometry.coordinates[0])) < RADIUS;
@@ -1274,8 +1529,7 @@
         showInView();
         countWithin(e);
       });
-      // showInView();
-      // countWithin();
+      
 
     }
 
@@ -1347,6 +1601,8 @@
         console.log("Finished toAddress");
       }
     });
+
+
 
 </script>    
 </body>

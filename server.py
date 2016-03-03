@@ -253,6 +253,7 @@ def start_over():
 
     session['waypoints'] = []
     session['profile'] = ""
+    session['trip_note'] = {}
     print "updated session:", session
 
     return "Trip board cleared!"
@@ -280,6 +281,7 @@ def more_info_from_foursquare():
     # query marker info from database and get venue's foursquare id
     marker = Marker.query.filter_by(marker_id=marker_id).first()
     VENUE_ID = marker.foursquare_id
+    name = marker.name
 
     # get date string for request url
     today = datetime.utcnow()
@@ -319,6 +321,8 @@ def more_info_from_foursquare():
 
     # construct data needed
     data = {
+        "marker_id": marker_id,
+        "name": name,
         "photos": photo_urls,
         "tips": tips_list,
         "hours": hours_info,
@@ -328,8 +332,8 @@ def more_info_from_foursquare():
     return jsonify(data)
 
 
-@app.route('/geocode_address')
-def geocode_address():
+@app.route('/geocode_address_for_coordinates')
+def geocode_address_for_coordinates():
     """Given address, hit Google Geocoding API, get geojson coordinates."""
 
     address = request.args.get("address")
@@ -341,6 +345,27 @@ def geocode_address():
     data = {'coordinates': coordinates}
 
     return jsonify(data)
+
+
+@app.route('/add_trip_note', methods=['POST'])
+def add_trip_note():
+    """Add trip note."""
+
+    marker_id = request.form["marker_id"]
+    name = request.form["name"]
+    selected_day = request.form["selected_day"]
+    selected_hour = request.form["selected_hour"]
+
+    info = [marker_id, name, selected_day, selected_hour]
+    session['trip_note'][marker_id] = info 
+
+    if marker_id not in session['waypoints']:
+        session['waypoints'].append(marker_id)
+
+    update_waypoint_list()
+
+    return jsonify(session['trip_note'])
+
 
 #---------------------------------#
 
