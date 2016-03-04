@@ -10,13 +10,14 @@ from polyline.codec import PolylineCodec
 from datetime import date, datetime
 import geocoder
 import urllib
+from twilio.rest import TwilioRestClient
 
 from model import connect_to_db, Marker
 
 app = Flask(__name__)
 
 # Required to use Flask sessions and the debug toolbar
-app.secret_key = "exploooooooooore"
+app.secret_key = "exploooooooooorer"
 
 # Use StrictUndefined to raise an error when there is undefined variable in Jinja2.
 app.jinja_env.undefined = StrictUndefined
@@ -40,14 +41,17 @@ def map():
 
 @app.route('/features-20160210.geojson')
 def send_features():
-    """send static file for map to download."""
+    """First trial way to send data for map: 
+       send static geojson file for map to download."""
 
     return app.send_static_file("features-20160210.geojson")
 
 
 @app.route('/events.geojson')
 def events_json():
-    """Geojson from database for event layer."""
+    """Second and now-in-use way to send data for map:
+       construct Geojson from database.
+       This is for event layer."""
 
     today = date.today()
     # use date 0225 for testing purpose
@@ -142,26 +146,20 @@ def add_waypoint():
                 return "You've already selected it!"
             else:
                 session['waypoints'].append(waypoint_id)
-                print session
                 return "Waypoint added!"
         else:
             return "Sorry, you can't select more than 6 waypoints."
     else:
         session['waypoints'] = [waypoint_id]
-        print session
         return "Waypoint added!"
 
     print "session['waypoints']:", session['waypoints']
 
-    # flash("Added to trip!")
 
+@app.route('/get_new_waypoint_name')
+def get_new_waypoint_name():
+    """Given newly added waypoint id, return name from database."""
 
-@app.route('/update_waypoint_list')
-def update_waypoint_list():
-    """Get newly added waypoint id, return name from database.
-    ******Fix*******"""
-
-    print "current session:", session['waypoints']
     waypoint_list = session['waypoints']
     new_waypoint_id = waypoint_list[-1]
     marker = Marker.query.filter_by(marker_id=new_waypoint_id).first()
@@ -170,9 +168,10 @@ def update_waypoint_list():
     return waypoint_name
 
 
-@app.route('/get_profile')
-def get_profile():
-    """Get profile, store new or update in session."""
+@app.route('/get_travel_profile')
+def get_travel_profile():
+    """Get travel profile (walking/cycling/driving), 
+       store new or update in session."""
 
     profile = request.args.get("profile")
 
@@ -183,8 +182,10 @@ def get_profile():
 
 
 @app.route('/get_route')
-def get_route():
-    """Use travel profile and waypoints in session, get route's line points."""
+def get_route_geojson():
+    """Use travel profile and waypoints in session, 
+       get route's line points in geojson format,
+       using Mapbox directions api."""
 
     profile = "mapbox." + str(session['profile'])
     waypoints_id_list = session['waypoints']
@@ -215,45 +216,13 @@ def get_route():
     # https://api.mapbox.com/v4/directions/mapbox.driving/-122.42,37.78;-77.03,38.91.json?alternatives=false&instructions=html&geometry=polyline&steps=false&&access_token=pk.eyJ1IjoidGVycml3bGVlIiwiYSI6ImNpazZlaThsajAwcXdpMm0ycHUyZjhiYjkifQ.zvJK8nAc3HpNOtCAMh5QlQ
 
 
-@app.route('/get_route_polyline')
-def get_route_polyline():
-    """Use travel profile and waypoints in session, get route's polyline geometry."""
-
-    profile = "mapbox." + str(session['profile'])
-    waypoints_id_list = session['waypoints']
-    latlngs = ""
-
-    for i in waypoints_id_list:
-        marker = Marker.query.filter_by(marker_id=i).one()
-        lon = marker.longitude
-        lat = marker.latitude
-        latlngs += (lon + "," + lat + ";")
-
-    waypoints = latlngs[:-1]
-
-    access_token = os.environ['MAPBOX_ACCESS_TOKEN']
-
-    url = "https://api.mapbox.com/v4/directions/" + profile + "/" + waypoints + ".json?alternatives=false&instructions=text&geometry=polyline&steps=true&&access_token=" + access_token
-
-    r = requests.get(url)
-    r = r.json()
-    geometry = r['routes'][0]['geometry']
-    latlngs = PolylineCodec().decode(geometry)
-    geometry = {'geometry': latlngs}
-    print geometry
-
-    return jsonify(geometry)
-
-
 @app.route('/start_over')
 def start_over():
     """Clear waypoint list and profile in session, return message."""
 
-    # commit waypoint sequence to database before clean
-
     session['waypoints'] = []
     session['profile'] = ""
-    session['trip_note'] = {}
+    session['trip_note'] = []
     print "updated session:", session
 
     return "Trip board cleared!"
@@ -261,7 +230,7 @@ def start_over():
 
 @app.route('/hi_explorer')
 def hi_explorer():
-    """Testing page to greet explorers."""
+    """Testing cover page to greet explorers."""
 
     return render_template("greet.html")
 
@@ -282,7 +251,7 @@ def more_info_from_foursquare():
     marker = Marker.query.filter_by(marker_id=marker_id).first()
     VENUE_ID = marker.foursquare_id
     name = marker.name
-    address= marker.address
+    address = marker.address
 
     # get date string for request url
     today = datetime.utcnow()
@@ -334,17 +303,21 @@ def more_info_from_foursquare():
     return jsonify(data)
 
 
-@app.route('/geocode_address_for_coordinates')
+@app.route('/geocode_address')
 def geocode_address_for_coordinates():
     """Given address, hit Google Geocoding API, get geojson coordinates."""
 
     address = request.args.get("address")
 
     address_str = urllib.unquote_plus(str(address))  # format string from url
-    r = geocoder.google(address_str)  # google geocoding api
-    coordinates = r.geojson['geometry']['coordinates']  # [lng, lat]
-
-    data = {'coordinates': coordinates}
+    r = geocoder.google(address_str)
+    if r.ok:  # check if api request is ok
+        coordinates = r.geojson['geometry']['coordinates']  # [lng, lat]
+        data = {
+                "status": "ok",
+                "coordinates": coordinates}
+    else:
+        data = {"status": "no found"}
 
     return jsonify(data)
 
@@ -354,17 +327,25 @@ def add_trip_note_to_session():
     """Add trip note to session."""
 
     marker_id = request.form["marker_id"]
+    marker = Marker.query.filter_by(marker_id=marker_id).one()
+    address = marker.address
     name = request.form["name"]
     selected_day = request.form["selected_day"]
     selected_hour = request.form["selected_hour"]
 
-    info = [name, selected_day, selected_hour]
-    session['trip_note'][marker_id] = info
+    info = (marker_id, name, address, selected_day, selected_hour)
+
+    if "trip_note" in session.keys():
+        session['trip_note'].append(info)
+    else:
+        session['trip_note'] = []
+        session['trip_note'].append(info)
 
     if marker_id not in session['waypoints']:
         session['waypoints'].append(marker_id)
 
-    update_waypoint_list()
+    get_new_waypoint_name()
+
     print "session['trip_note']: ", session['trip_note']
 
     return "Trip noted added!"
@@ -392,18 +373,26 @@ def update_trip_note_to_board():
     return jsonify(data)
 
 
-@app.route('/trip_preview')
-def show_trip_preview():
-    """Extract data stored in session, return trip info for preview."""
+@app.route('/send_sms', methods=['POST'])
+def send_sms():
+    """Construct sms message with trip notes, send via Twilio."""
 
+    # account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    # auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    # client = TwilioRestClient(account_sid, auth_token)
 
+    to_number = request.form['receiver_number']
+    from_number = "+19163183606"
 
+    text = ""
+    for note in session['trip_note']:
+        text + str(note[1]) + " | " + str(note[2]) + " | " + str(note[3]) + " " + str(note[4])
 
-@app.route('/show_trip')
-def show_trip():
-    """Given waypoints, show trip details."""
+    print text
 
-    return render_template("trip.html")
+    return text
+    # message = client.messages.create(to=to_number, from_=from_number, body="Hello from Weekend Wanderlust!")
+
 
 
 #---------------------------------#
