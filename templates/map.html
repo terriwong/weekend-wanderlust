@@ -407,6 +407,8 @@
       margin-top: 8px;
       margin-bottom: 2px;
       cursor: pointer;
+      text-transform: uppercase;
+      font-weight: bold;
     }
 
     #popupButton:hover {
@@ -1297,7 +1299,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip Panel</button></form>'; 
+        var popupContent = '<b>' + feature.properties.name + '</b><br>' + feature.properties.address + '<br><form action="/add_waypoint"><input type="hidden" name="marker_id" onclick="openPanel()" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add waypoint</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
@@ -1310,7 +1312,7 @@
         var marker = e.layer,
             feature = marker.feature;
 
-        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add To Trip Panel</button></form>'; 
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><form action="/add_waypoint"><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add waypoint</button></form>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
@@ -1587,11 +1589,11 @@
     });
 
     // experiment.
-    $('#add-path').on('click', function(e) {
-      e.preventDefault();
-      $.get('/get_route_polyline', addPath);
-      console.log("Finished add path");
-    });
+    // $('#add-path').on('click', function(e) {
+    //   e.preventDefault();
+    //   $.get('/get_route_polyline', addPath);
+    //   console.log("Finished add path");
+    // });
 
     // experiment.
     $('#remove-path').on('click', function(e) {
@@ -1653,6 +1655,7 @@
     });
 
     $('#receiverNumber').keypress(function(e) {
+      console.log("enter is pressed!")
         if (e.which == 13) {
           var number = $(this).val();
           console.log(number);

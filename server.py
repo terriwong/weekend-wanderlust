@@ -399,7 +399,7 @@ def send_sms():
         selected_hour = note[4].replace(u'\u2013', u'-').encode('ascii', 'ignore')
         # time = text.replace(u'\u2019', u'\'').replace(u'\u2013', u'-').encode('ascii', 'ignore')
 
-        text = text + name + " | " + address + " | " + selected_day + " " + selected_hour + "\n"
+        text = text + name + " \n " + "|" + address + " \n " + "|" + selected_day + " " + selected_hour + "\n"
 
     # text = text.replace(u'\u2019', u'\'').replace(u'\u2013', u'-').encode('ascii', 'ignore')
 
