@@ -377,21 +377,38 @@ def update_trip_note_to_board():
 def send_sms():
     """Construct sms message with trip notes, send via Twilio."""
 
-    # account_sid = os.environ['TWILIO_ACCOUNT_SID']
-    # auth_token = os.environ['TWILIO_AUTH_TOKEN']
-    # client = TwilioRestClient(account_sid, auth_token)
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    client = TwilioRestClient(account_sid, auth_token)
 
     to_number = request.form['receiver_number']
+    to_number = "+1" + str(to_number)
+    print "to_number is: ", to_number
+
     from_number = "+19163183606"
+    print "from_number is: ", from_number
 
     text = ""
+
     for note in session['trip_note']:
-        text + str(note[1]) + " | " + str(note[2]) + " | " + str(note[3]) + " " + str(note[4])
+        marker_id = note[0].encode('ascii', 'ignore')
+        marker = Marker.query.filter_by(marker_id=marker_id).one()
+        name = marker.name
+        address = marker.address
+        selected_day = note[3].replace(u'\u2013', u'-').encode('ascii', 'ignore')
+        selected_hour = note[4].replace(u'\u2013', u'-').encode('ascii', 'ignore')
+        # time = text.replace(u'\u2019', u'\'').replace(u'\u2013', u'-').encode('ascii', 'ignore')
 
-    print text
+        text = text + name + " | " + address + " | " + selected_day + " " + selected_hour + "\n"
 
-    return text
-    # message = client.messages.create(to=to_number, from_=from_number, body="Hello from Weekend Wanderlust!")
+    # text = text.replace(u'\u2019', u'\'').replace(u'\u2013', u'-').encode('ascii', 'ignore')
+
+    print "text is: ", text
+
+    # return text
+    message = client.messages.create(to=to_number, from_=from_number, body=text)
+
+    return "Message sent!"
 
 
 

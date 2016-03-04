@@ -370,22 +370,6 @@
       padding: 10px;
     }
 
-    .hide {
-      visibility: hidden;
-    }
-
-    .show {
-      visibility: visible;
-    }
-
-    .is-visible {
-      display: block;
-    }
-
-    .inline {
-      display: inline;
-    }
-
 /*    .sidebar {
       width: 33.3333%;
     }
@@ -847,10 +831,53 @@
       to {top: 0; opacity: 1}
     }
 
-    #type-number {
+    .type-number {
       display: none;
+      background: white;
+      font-size: 12px;
+      line-height: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+      float: right;
+      margin-right: 5px;
+      z-index: 50;
+      /*position: absolute;*/
+      /*right: 10px;
+      top: 170px;*/
+      padding: 10px 20px;
+      border: 2px solid #33cccc;
+      text-decoration: none;
+      min-width: 165px;
+      
+      /*border: 2px solid white;*/
+      
+      /*opacity: .7;*/
+      
     }
  
+    .hide {
+      visibility: hidden;
+    }
+
+    .show {
+      visibility: visible;
+    }
+
+    .is-visible {
+      display: block;
+    }
+
+    .invisible {
+      display: none;
+    }
+
+    .inline {
+      display: inline;
+    }
+
+    .inline-block {
+      display: inline-block;
+    }
     
     </style>
 </head>
@@ -866,9 +893,9 @@
     </div>
     <div id="tripPreviewContent"class="modal-body"></div>
     <div class="modal-footer">
-      <span id="sendEmailBtn" class="modal-button">Send this note to email</span>
+      <span id="sendEmailBtn" class="modal-button invisible">Send this note to email</span>
       <span id="sendSmsBtn" class="modal-button">Send this note via sms</span>
-      <input type="text" id="type-number" name="receiver_number" placeholder="Type receiver number and enter">
+      <input type="text" id="receiverNumber" class="type-number" name="receiver_number" placeholder="Type number and enter">
     </div>
   </div>
 </div>
@@ -938,11 +965,11 @@
   <p>Trip Planner Panel</p><br> 
   <div><b>Selected waypoints:</b>
     <ol id='waypoint-list'></ol></div>
-  <b>Selected travel profile: </b><div id="selected-profile" class="inline"></div><br>
+  <b>Selected travel profile: </b><div id="selected-profile" class="inline"></div><br><br>
   <div>
     <b>Distance: </b><div id="distance" class="inline"></div><br>
     <b>Estimated time: </b><div id="duration" class="inline"></div><br>
-  </div>
+  </div><br>
 
   <form action="/get_travel_profile">
     Way of traveling:<br>
@@ -954,11 +981,11 @@
   <div id="status"></div>
 
   <button id="get-route">Show route</button>
-  <button id="clear-route">Clear route</button>
+  <button id="clear-route" class="invisible">Clear route</button>
   <button id="start-over">Start over</button><br>
 
   <button id="show-circle">Explorer circle</button>
-  <button id="remove-circle">Remove circle</button> 
+  <button id="remove-circle">Show all</button> 
   <button id="view-trip-note">View trip note</button>
 </div>
 
@@ -1109,8 +1136,8 @@
 
     // load base map, set initial position, add search controller.
     var map = L.mapbox.map('map', 'mapbox.streets')
-        .setView([37.71, -122.327], 10)
-        .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
+        .setView([37.71, -122.327], 10);
+        // .addControl(L.mapbox.geocoderControl('mapbox.places')); //search
 
 
     // add event layer to map and load event markers geojson.
@@ -1396,6 +1423,7 @@
     
     // helper function to show route and details
     function showRoute(results) {
+        clearRoute();
         // get LineString geojson
         var myLines = results.geometry;
         // add LineString to routeLayer
@@ -1545,12 +1573,17 @@
     });
 
     // clear route from map
-    $('#clear-route').on('click', function(e) {
-      e.preventDefault();
+    function clearRoute() {
+      // e.preventDefault();
       if (map.hasLayer(routeLayer)) {
         // map.removeLayer(routeLayer);}
-        routeLayer.clearLayers();}
+        routeLayer.clearLayers();
+      }
       console.log("Finished remove routeLayer"); 
+    };
+
+    $('#clear-route').on('click', function() {
+      clearRoute();
     });
 
     // experiment.
@@ -1573,6 +1606,9 @@
       $('#selected-profile').empty();
       console.log("Finished empty profile");
       $('#tripPreviewContent').empty();
+      $('#distance').empty();
+      $('#duration').empty();
+      clearRoute();
       $.get('/start_over', showStatus);
       console.log("Finished show status");
     });
@@ -1612,10 +1648,11 @@
 
     $('#sendSmsBtn').on('click', function(e) {
       e.preventDefault();
-      $('receiverNumber').addClass("is-visible");
+      $('#receiverNumber').addClass("inline-block");
+      console.log("number input should show!")
     });
 
-    $('type-number').keypress(function(e) {
+    $('#receiverNumber').keypress(function(e) {
         if (e.which == 13) {
           var number = $(this).val();
           console.log(number);
