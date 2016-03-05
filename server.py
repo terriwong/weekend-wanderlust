@@ -388,7 +388,7 @@ def send_sms():
     from_number = "+19163183606"
     print "from_number is: ", from_number
 
-    text = ""
+    text = "Hi Explorer! Below is the trip note from Weekend Wanderlust, happy exploring this weekend!>>>" + "\n"
 
     for note in session['trip_note']:
         marker_id = note[0].encode('ascii', 'ignore')
