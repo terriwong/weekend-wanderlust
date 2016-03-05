@@ -1,7 +1,11 @@
-"""WWM DATABASE: Data model for events, hiddengems, trips."""
+"""WWM DATABASE: Data model for 
+   [1.0] - events, 
+           hiddengems, 
+   [2.0] - trips,
+"""
 
 from flask_sqlalchemy import SQLAlchemy
-# from sqlalchemy.dialects.postgresql import ARRAY
+# [For 2.0] from sqlalchemy.dialects.postgresql import ARRAY
 
 db = SQLAlchemy()
 
@@ -27,7 +31,7 @@ class Marker(db.Model):
     city = db.Column(db.String(64), nullable=True)
     description = db.Column(db.String(1000), nullable=True)
     cost = db.Column(db.String(64), nullable=True)
-    # cost_tier = db.Column(db.String(5), nullable=True)  # for restaurants: number of dollar signs
+    # [For 2.0] cost_tier = db.Column(db.String(5), nullable=True)  # for restaurants: number of dollar signs
     img_url = db.Column(db.String(255), nullable=True)
     event_url = db.Column(db.String(255), nullable=True)
     category = db.Column(db.String(64), nullable=False)
@@ -41,9 +45,10 @@ class Marker(db.Model):
 
         return "<Marker marker_id=%s name=%s" % (self.marker_id, self.name)
 
-    # restaurant: reservation
+    # [For 2.0] restaurant: reservation
 
 
+# [For 2.0: Save Trip feature.]
 # class Trip(db.Model):
 #     """table for trips."""
 

@@ -6,11 +6,6 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
     <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
-    <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
-
-    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
-    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
-    <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
 
 <style>
     @import url(https://fonts.googleapis.com/css?family=Nunito);
@@ -248,7 +243,8 @@
   .menu-ui {
   background:#fff;
   position:absolute;
-  top:10px;right:10px;
+  top:20px;
+  right:10px;
   z-index:1;
   border-radius:3px;
   width:15%;
@@ -637,7 +633,7 @@
       display: block;
       position: absolute;
       right: 10px;
-      top: 210px;
+      top: 215px;
       z-index: 50;
       text-align: center;
       padding: 10px;
@@ -669,7 +665,7 @@
       display: block;
       position: absolute;
       right: 10px;
-      top: 170px;
+      top: 175px;
       padding: 10px;
       border: 2px solid #33cccc;
       text-decoration: none;
@@ -880,11 +876,30 @@
     .inline-block {
       display: inline-block;
     }
+
+    .logo-overlay {
+      max-width: 220px;
+      height: auto;
+      z-index: 990;
+      position: absolute;
+      display: block;
+      /*top: 22px;*/
+      bottom: 35px;
+      left: 43%;      
+    }
+
+    .logo {
+      width: 100%;
+      height: auto;
+    }
     
     </style>
 </head>
 <body>
-
+<!-- logo -->
+<div class="logo-overlay">
+<a href="/"><img src="/static/img/wwm-logo-2.svg" class="logo" alt="Weekend Wanderlust Map"></a>
+</div>
 
 <!-- Modal box for trip preview -->
 <div id="tripPreviewModal" class="modal">
