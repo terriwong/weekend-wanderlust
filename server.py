@@ -406,7 +406,7 @@ def send_sms():
     print "text is: ", text
 
     # return text
-    # message = client.messages.create(to=to_number, from_=from_number, body=text)
+    message = client.messages.create(to=to_number, from_=from_number, body=text)
 
     return "Message sent!"
 

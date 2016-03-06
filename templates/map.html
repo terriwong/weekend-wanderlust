@@ -226,12 +226,19 @@
     $('#map').on('click', '.event-add-note-btn', function (e){
       e.preventDefault();
       console.log(this.dataset.name);
+      var targetId = this.dataset.id;
       var targetName = this.dataset.name;
       var targetAddress = this.dataset.address;
       var day = this.dataset.date;
       var hours = this.dataset.time;
       var newNote = '<div class="noteBlock"><span class="noteTitle">' + targetName + '</span><span class="noteAddress">' + targetAddress +'</span><span class="noteHours">' + day + " " + hours + '</span></div>';
       $('#tripPreviewContent').append(newNote);
+      $.post('/add_trip_note', {
+                              "marker_id": targetId,
+                              "name": targetName,
+                              "selected_day": day,
+                              "selected_hour": hours
+                            }, showStatus);
       $('#tripPreviewModal').addClass("modal-visible");
     });
 
@@ -474,7 +481,7 @@
             feature = marker.feature;
             console.log(feature);
 
-        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add waypoint</button><button id="eventTripNoteBtn" class="event-add-note-btn" data-name="' + feature.properties.name +'" data-address="'+ feature.properties.address +'" data-date="' + feature.properties.date +'" data-time="'+ feature.properties.time + '">Add Trip Note</button>'; 
+        var popupContent = '<b>' + feature.properties.title + '</b><br><small>' + feature.properties.date + ' | ' + feature.properties.time + '</small><br>' + feature.properties.description + '<br><div><small>Address: ' + feature.properties.address + '</small></div><input type="hidden" name="marker_id" value="' + feature.id + '"><button id="popupButton" class="trigger" onclick="openPanel()" data-id="' + feature.id + '" data-name="' + feature.properties.name + '">Add waypoint</button><button id="eventTripNoteBtn" class="event-add-note-btn" data-id="'+ feature.id +'"data-name="' + feature.properties.name +'" data-address="'+ feature.properties.address +'" data-date="' + feature.properties['date-tier'] +'" data-time="'+ feature.properties.time + '">Add Trip Note</button>'; 
         
         marker.bindPopup(popupContent, {
             closeButton: true,
