@@ -416,7 +416,7 @@ def send_sms():
 
 if __name__ == "__main__":
 
-    app.debug = True
+    # app.debug = True
 
     connect_to_db(app)
 
