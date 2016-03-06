@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html5>
 <html>
 <head>
 
@@ -11,15 +11,16 @@
     <link href="/static/wwm.css" rel="stylesheet">
 
   {% block head %}
-      <!-- put extra CSS/JS here -->
+      <!-- CSS/JS here -->
   {% endblock %}
 
 </head>
 <body>
 
+<!-- Reserved for flash messages -->
 {% with messages = get_flashed_messages() %}
   {% if messages %}
-    <ul class=flashes>
+    <ul class="flashes">
     {% for message in messages %}
       <li>{{ message }}</li>
     {% endfor %}
@@ -28,6 +29,7 @@
 {% endwith %}
 
 {% block body %}
+  <!-- html here -->
 {% endblock %}
 
 </body>

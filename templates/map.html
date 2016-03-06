@@ -1,7 +1,7 @@
 <!DOCTYPE html5>
 <html>
 <head>
-    <meta charset=utf-8 />
+    <meta charset="UTF-8">
     <title>Weekend Wanderlust</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
@@ -796,9 +796,21 @@
       text-transform: uppercase;
       cursor: pointer;
       border: 2px solid white;
-      float: right;
+      float: left;
       opacity: .7;
-      margin-right: 5px;
+      margin-left: 20px;
+    }
+
+    .status-area {
+      background: transparent;
+      padding: 10px 20px;
+      font-size: 12px;
+      line-height: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: none;
+      float: left;
+      margin-left: 5px;
     }
 
     .modal-button:hover {
@@ -835,8 +847,8 @@
       font-size: 12px;
       line-height: 22px;
       font-weight: bold;
-      text-transform: uppercase;
-      float: right;
+      /*text-transform: uppercase;*/
+      float: left;
       margin-right: 5px;
       z-index: 50;
       /*position: absolute;*/
@@ -846,7 +858,7 @@
       border: 2px solid #33cccc;
       text-decoration: none;
       min-width: 165px;
-      
+      margin-left: 5px;
       /*border: 2px solid white;*/
       
       /*opacity: .7;*/
@@ -910,9 +922,9 @@
     </div>
     <div id="tripPreviewContent"class="modal-body"></div>
     <div class="modal-footer">
-      <span id="sendEmailBtn" class="modal-button invisible">Send this note to email</span>
       <span id="sendSmsBtn" class="modal-button">Send this note via sms</span>
       <input type="text" id="receiverNumber" class="type-number" name="receiver_number" placeholder="Type number and enter">
+      <span id="status-area" class="modal-button status-area"></span>
     </div>
   </div>
 </div>
@@ -1660,10 +1672,10 @@
 
     function showResponse(results) {
       console.log(results);
-      // $('#receiverNumber').removeClass("inline-block");
-      $('#sendSmsBtn').text(results);
+      $('#status-area').text(results).fadeIn().delay(1000).fadeOut('normal', function() {
+        $(this).remove();
+        });
       $('#receiverNumber').val("");
-
     }
 
     $('#sendSmsBtn').on('click', function(e) {
