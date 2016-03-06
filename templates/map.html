@@ -889,6 +889,7 @@
       display: inline-block;
     }
 
+    /* logo */
     .logo-overlay {
       max-width: 220px;
       height: auto;
@@ -905,9 +906,98 @@
       height: auto;
     }
     
+    /* loader css */
+    .loader {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0,0,0);
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    @-webkit-keyframes ball-scale-multiple {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+    opacity: 0; }
+  5% {
+    opacity: 1; }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+    opacity: 0; } }
+
+@keyframes ball-scale-multiple {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+    opacity: 0; }
+  5% {
+    opacity: 1; }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+    opacity: 0; } }
+
+.ball-scale-multiple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translateY(-30px);
+      -ms-transform: translateY(-30px);
+          transform: translateY(-30px); }
+  .ball-scale-multiple > div:nth-child(2) {
+    -webkit-animation-delay: -0.4s;
+            animation-delay: -0.4s; }
+  .ball-scale-multiple > div:nth-child(3) {
+    -webkit-animation-delay: -0.2s;
+            animation-delay: -0.2s; }
+  .ball-scale-multiple > div {
+    background-color: #fff;
+    width: 15px;
+    height: 15px;
+    border-radius: 100%;
+    margin: 2px;
+    -webkit-animation-fill-mode: both;
+            animation-fill-mode: both;
+    position: absolute;
+    left: -30px;
+    top: 0px;
+    opacity: 0;
+    margin: 0;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: ball-scale-multiple 1s 0s linear infinite;
+            animation: ball-scale-multiple 1s 0s linear infinite; }
+
+
+    .narrative {
+      position: absolute;
+      top: 54%;
+      left: 48%;
+      color: white;
+      opacity: .7;
+      font-weight: lighter;
+      font-size: 12px;
+    }
+
     </style>
 </head>
 <body>
+<!-- loader -->
+<div id="wait" class="loader">
+  <div class="loader-inner ball-scale-multiple">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <div class="narrative">locating...</div>
+</div>
 <!-- logo -->
 <div class="logo-overlay">
 <a href="/"><img src="/static/img/wwm-logo-2.svg" class="logo" alt="Weekend Wanderlust Map"></a>
@@ -1023,6 +1113,15 @@
 <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="//cdn.jsdelivr.net/jquery.scrollto/2.1.2/jquery.scrollTo.min.js"></script>
 <script>
+
+    $(document).ready(function() {
+        $(document).ajaxStart(function() {
+          $('#wait').css("display", "block");
+        });
+        $(document).ajaxComplete(function() {
+          $('#wait').css("display", "none");
+        });
+    });
 
     $('#toggle').click(function() {
         $(this).toggleClass('active');
@@ -1488,6 +1587,7 @@
       geolocate.onclick = function(e) {
         e.preventDefault();
         e.stopPropagation();
+        $('#wait').css("display", "block");
         map.locate();
       };
     }
@@ -1498,9 +1598,9 @@
         maxZoom: 14
       });
 
-      showWithin(e);
-      showInView(e);
-      countWithin(e);
+      // showWithin(e);
+      // showInView(e);
+      // countWithin(e);
 
       var currentMarker = {
           type: 'Feature',
@@ -1509,16 +1609,29 @@
             coordinates: [e.latlng.lng, e.latlng.lat]
           },
           properties: {
-            'title': 'You are here!',
+            'title': 'You are here! Click to explore',
             'marker-color': '#F03C02',
             'marker-symbol': 'star'
           }
         };
 
       currentLocationLayer.setGeoJSON(currentMarker).openPopup();
-
+      $('#wait').css("display", "none");
         // hide the geolocation button
         geolocate.parentNode.removeChild(geolocate);
+
+      currentLocationLayer.on('click', function(e) {
+        filterCircle.setLatLng(e.latlng);
+        hiddengemLayer.addTo(map);
+        hiddengemLayer.setFilter(function showGems(feature) {
+        return e.latlng.distanceTo(L.latLng(
+          feature.geometry.coordinates[1],
+          feature.geometry.coordinates[0])) < RADIUS;
+        });
+        showInView();
+        countWithin(e);
+      });
+
     });
 
     map.on('locationerror', function() {
@@ -1528,6 +1641,7 @@
 
     function findAddress(results) {
       console.log(results);
+      $('#wait').css("display", "none");
       if (results.status === "no found") {
         alert("Address no found! Try again.")
       }
@@ -1647,8 +1761,10 @@
       if(e.which == 13) {
         var address = $(this).val();
         console.log(address);
+        $('#wait').css("display", "block");
         $.get('/geocode_address', {'address': address}, findAddress);
         console.log("Finished toAddress");
+
       }
     });
 
@@ -1670,6 +1786,7 @@
       }
     }
 
+    // when user type number and enter to send sms, flash message shows and fadeout.
     function showResponse(results) {
       console.log(results);
       $('#status-area').text(results).fadeIn().delay(1000).fadeOut('normal', function() {
