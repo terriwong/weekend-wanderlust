@@ -81,6 +81,8 @@ def connect_to_db(app):
 
 
 if __name__ == "__main__":
+    # Allows interactive querying in the shell
+    
     from server import app
     connect_to_db(app)
     print "Connected to DB."

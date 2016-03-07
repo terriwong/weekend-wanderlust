@@ -461,7 +461,7 @@
     if (!navigator.geolocation) {
       geolocate.innerHTML = 'Geolocation is not available';
     } else {
-      geolocate.onclick = function(e) {
+      geolocate.onclick = function findCurrentLocation(e) {
         e.preventDefault();
         e.stopPropagation();
         $('#wait').css("display", "block");
@@ -520,7 +520,8 @@
       console.log(results);
       $('#wait').css("display", "none");
       if (results.status === "no found") {
-        alert("Address no found! Try again.")
+        alert("Not found! Try again.");
+        return "Not found! Try again.";
       }
       var lnglat = results.coordinates;
       var addressLayer = L.mapbox.featureLayer().addTo(map);
@@ -547,7 +548,7 @@
       var latlng = {
         lat: lnglat[1],
         lng: lnglat[0]
-      }
+      };
       console.log(latlng);
 
       addressLayer.on('click', function(e) {
@@ -562,7 +563,8 @@
         countWithin(e);
       });
       
-
+      console.log(newMarker.geometry.coordinates);
+      return newMarker.geometry.coordinates
     }
 
 
