@@ -788,6 +788,7 @@
 
     .noteTitle {
       display: inline-block;
+      font-size: 12px;
       max-width: 150px;
       padding: 10px 20px 10px 0px;
     }
@@ -929,7 +930,7 @@
 
     /* logo */
     .logo-overlay {
-      max-width: 220px;
+      max-width: 200px;
       height: auto;
       z-index: 990;
       position: absolute;
@@ -937,6 +938,11 @@
       /*top: 22px;*/
       bottom: 35px;
       left: 43%;      
+    }
+
+    .logo-overlay:hover {
+      transform: scale(1.2);
+      transition: transform .3s ease-in-out;
     }
 
     .logo {
