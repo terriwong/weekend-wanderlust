@@ -626,7 +626,7 @@
 
     .tabs-panel {
       position: relative;
-      top: 55px;
+      /*top: 55px;*/
       left: 0;
       width: 100%;
       min-height: 490px;
@@ -692,6 +692,7 @@
     }
 
     #status {
+      display: none;
       padding: 10px 5px 10px 0px;
     }
 
