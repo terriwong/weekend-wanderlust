@@ -54,8 +54,9 @@ def events_json():
        This is for event layer."""
 
     today = date.today()
+    
     # use date 0225 for testing purpose
-    today = today.replace(month=2, day=25)
+    # today = today.replace(month=2, day=25)
 
     e_geojson = {
                 "type": "FeatureCollection",

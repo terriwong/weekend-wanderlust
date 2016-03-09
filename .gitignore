@@ -2,3 +2,4 @@ env/
 *.pyc
 secrets.sh
 node_modules/
+jasmine_testing.html

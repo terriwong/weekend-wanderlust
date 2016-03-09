@@ -113,16 +113,17 @@
     <b>Distance: </b><div id="distance" class="inline"></div><br>
     <b>Estimated time: </b><div id="duration" class="inline"></div><br>
   </div><br>
-
+  <!-- radio for travel profile selection -->
   <form action="/get_travel_profile">
     Way of traveling:<br>
     <input type="radio" name="profile" value="walking">Walking
     <input type="radio" name="profile" value="cycling">Cycling
     <input type="radio" name="profile" value="driving">Driving<br>
   </form>
+  <!-- hidden elements in trip panel -->
   <div id="trip-note-content"></div>
   <div id="status"></div>
-
+  <!-- buttons in trip panel -->
   <button id="get-route" class="panel-button">Show route</button>
   <button id="clear-route" class="invisible">Clear route</button>
   <button id="start-over" class="panel-button">Start over</button><br>
@@ -139,13 +140,13 @@
 
 
   <!-- For testing -->
-  <!--
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.4.1/jasmine.js"></script>
+
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.4.1/jasmine.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.4.1/jasmine-html.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.4.1/boot.js"></script>
 
-  <script src="/static/map-spec.js"></script>
--->
+  <script src="/static/map-spec.js"></script>-->
+
 
 </body>
 </html>

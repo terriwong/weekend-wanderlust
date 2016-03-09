@@ -457,33 +457,26 @@
     // get current location by HTML5 geolocation API
     var geolocate = document.getElementById('geolocate');    
     var currentLocationLayer = L.mapbox.featureLayer().addTo(map);
-    
-    if (!navigator.geolocation) {
-      geolocate.innerHTML = 'Geolocation is not available';
-    } else {
-      geolocate.onclick = function findCurrentLocation(e) {
+
+    // function to geolocate browser
+    function findCurrentLocation(e) {
+        console.log(e);
         e.preventDefault();
         e.stopPropagation();
         $('#wait').css("display", "block");
         map.locate();
-      };
-    }
+      }
 
-    map.on('locationfound', function(e) {
-      
-      map.fitBounds(e.bounds, {
-        maxZoom: 14
-      });
+    // function to add marker
+    function addMarker(latlng) {
 
-      // showWithin(e);
-      // showInView(e);
-      // countWithin(e);
+      console.log(latlng);
 
       var currentMarker = {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [e.latlng.lng, e.latlng.lat]
+            coordinates: [latlng.lng, latlng.lat]
           },
           properties: {
             'title': 'You are here! Click to explore',
@@ -493,10 +486,34 @@
         };
 
       currentLocationLayer.setGeoJSON(currentMarker).openPopup();
-      $('#wait').css("display", "none");
-        // hide the geolocation button
-        geolocate.parentNode.removeChild(geolocate);
 
+      console.log("marker added!");
+    }
+
+    // check if browser supports geolocation, 
+    // if not, notify user;
+    // if yes, start geolocation process.
+    if (!navigator.geolocation) {
+      geolocate.innerHTML = 'Geolocation is not available';
+    } else {
+      $('#geolocate').on('click', findCurrentLocation);
+    }
+
+    // if location is found, zoom in, add marker.
+    map.on('locationfound', function(e) {
+      
+      map.fitBounds(e.bounds, {
+        maxZoom: 14
+      });
+
+      addMarker(e.latlng);
+
+      $('#wait').css("display", "none");
+
+      // hide the 'to current location' button when finished
+      geolocate.parentNode.removeChild(geolocate);
+
+      // click on the newly added marker, show circle, show hiddengems within and count.  
       currentLocationLayer.on('click', function(e) {
         filterCircle.setLatLng(e.latlng);
         hiddengemLayer.addTo(map);
