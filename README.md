@@ -9,3 +9,36 @@ PostgresSQL, SQLAlchemy, Python, Flask, JavaScript, JQuery, Ajax,  Jasmine, Sele
 FuncheapSF, hiddenSF, Leaflet, Mapbox.js,  Google Geocoding, Mapbox Directions, Foursquare, Twilio
 ####GitHub Project URL
 https://github.com/terriwong/weekend-wanderlust
+####Features
+#####Explore from upcoming weekend events
+![Click event to discover nearby hiddengems](https://cloud.githubusercontent.com/assets/4592446/13623112/fe9ae5ba-e558-11e5-8c3c-33b2d3ffac48.gif)
+* Filter events by Friday Night/Saturday/Sunday
+* Mouse over event marker to see event info
+* Click event marker to uncover hiddengems within 1 mile
+* Click hiddengem marker to navigate info
+* "Take a closer look" hidden button to show more info from Foursquare
+* Add Trip Note of addresses & hours
+
+#####Explore by activating Explorer Circle
+![Explorer Circle](https://cloud.githubusercontent.com/assets/4592446/13623393/314f316c-e55b-11e5-9721-d7ff122970dd.gif)
+* Constantly getting mouse's location to calculate and show hiddengems within 1 mile circle
+
+#####Explore from current location
+![Explore from current location](https://cloud.githubusercontent.com/assets/4592446/13623448/aace10e4-e55b-11e5-9ee9-4605c51be543.gif)
+* Get browser's location by HTML5 geolocation api
+
+#####Explore from typed address
+![Explore from typed address](https://cloud.githubusercontent.com/assets/4592446/13623541/2bd4c296-e55c-11e5-8dcc-f807a8b1b1a6.gif)
+* Locate typed address by Google Geocoding api
+
+#####Get routing estimates from selected waypoints
+![Get routing estimates from selected waypoints](https://cloud.githubusercontent.com/assets/4592446/13623502/e2d22cd2-e55b-11e5-8541-92efa6da782c.gif)
+* Get smart route from Mapbox Directions api
+
+#####Send Trip Note via SMS
+![Send Trip Note via SMS](https://cloud.githubusercontent.com/assets/4592446/13623605/a1abebe8-e55c-11e5-8b2d-17dc7a922add.gif)
+* Open Trip Note panel, send Trip Note in one SMS using Twilio programmable api
+
+##### Formatted Trip Note SMS
+![SMS](https://cloud.githubusercontent.com/assets/4592446/13623776/c9631908-e55d-11e5-8cf3-df6812c06730.gif)
+* Trip Note SMS is formatted in a way that's handy on the go
